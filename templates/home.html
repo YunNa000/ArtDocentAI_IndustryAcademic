@@ -1,0 +1,106 @@
+{% extends 'base.html' %}
+
+{% block title %}
+Home - ChatBot Service
+{% endblock %}
+
+{% block gallery_content %}
+
+{% endblock %}
+
+{% block chat_content %}
+
+<div class="chat-train">
+    <button onclick="chatTrain()" class="train-button">Train Chatbot</button>
+</div>
+
+<div id="chatbox" class="chat-box">
+    <!-- 챗봇 콘텐츠 내용 -->
+</div>
+<div class="input-area">
+    <input type="text" id="chattext" class="text-input" placeholder="Type your message here...">
+    <button onclick="sendAsk()" class="send-button">SEND</button>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+    function getCookie(name) {
+        var cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            var cookies = document.cookie.split(';');
+            for (var i = 0; i < cookies.length; i++){
+                var cookie = jQuery.trim(cookies[i]);
+                if(cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+
+    var csrftoken = getCookie('csrftoken');
+
+    function chatTrain(){
+
+        var strurl = "chattrain";
+        alert(strurl);
+
+        xhr = new XMLHttpRequest();
+        xhr.onreadystatechange = function() {
+            if (xhr.readyState == 4) { // 4: 정상
+                var data = xhr.responseText;
+
+                var obj = JSON.parse(data);
+                alert(obj.result);   
+            }
+        };
+        xhr.open("GET", strurl);
+        xhr.setRequestHeader("X-CSRFToken", csrftoken);
+        xhr.send(null);
+
+        }
+
+    function sendAsk() {
+        var chattext = document.getElementById("chattext").value;
+        if(chattext == "") {
+            document.getElementById("chattext").focus();
+            return false;
+        }
+
+        // 입력한 채팅 메시지가 계속 아래로 붙게 만듬
+        var addtext = "<div style='margin:20px 20px; text-align:right;'><span style='background-color:#FFFFFF; padding:5px 8px; border-radius:3px; display:inline-block; max-width:60%; word-wrap:break-word;'>" + chattext + "</span></div>";
+        document.getElementById("chatbox").innerHTML += addtext;
+
+        // 서버로부터 응답을 받는 대신에 임시 응답 생성
+        var bottext = "<div style='margin:20px; text-align:left; display:flex; align-items:center;'><img src='/static/assets/img/ai_img.jpeg' alt='AI Image' style='width: 40px; height: 40px; margin-right: 10px; border-radius: 50%;'><span style='background-color:#FEFAF6; padding:5px 8px; border-radius:3px; display:inline-block; max-width:60%; word-wrap:break-word;'>저는 챗봇입니다.</span></div>";
+        document.getElementById("chatbox").innerHTML += bottext;
+
+        // 메시지가 많아지면 아래쪽으로 스크롤이 따라가게 조정
+        var mydiv = document.getElementById("chatbox");
+        mydiv.scrollTop = document.getElementById("chatbox").scrollHeight;
+
+        // 실제 서버와의 통신을 추가하려면 이 부분에 AJAX 요청을 추가
+        /*
+        var strurl = "ask";
+        xhr = new XMLHttpRequest();
+        xhr.onreadystatechange = function() {
+            if (xhr.readyState == 4) {
+                var data = xhr.responseText;
+                var obj = JSON.parse(data);
+                var bottext = "<div style='margin:14px 0; text-align:left;'><span style='background-color:#DDDDDD; padding:5px 8px; border-radius:3px;'>" + obj.anstext + "</span></div>";
+                document.getElementById("chatbox").innerHTML += bottext;
+            }
+        };
+        xhr.open("GET", strurl);
+        xhr.setRequestHeader("X-CSRFToken", csrftoken);
+        xhr.send(null);
+        */
+
+        document.getElementById("chattext").value = "";
+        return false;
+    }
+</script>
+{% endblock %}

@@ -1,0 +1,140 @@
+/* 메뉴 탭 스타일링 */
+.sidebar {
+    width: 240px;
+    height: 100%;
+    background-color: #6C3428;
+    color: #FEFAF6;
+    font-family: 'Pretendard', sans-serif;
+    padding: 20px 0; /* 상단과 하단 패딩 */
+    position: fixed;
+    top: 0;
+    left: 0;
+}
+
+.menu-title {
+    font-size: 20px;
+    color: #FEFAF6;
+    padding-left: 20px;
+    padding-bottom: 50px; /* 메뉴 제목과 항목 사이의 간격 */
+}
+
+.nav {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.nav-item {
+    background-color: #FEFAF6;
+    width: 220px;
+    height: 45px;
+    margin-bottom: 20px; /* 메뉴 아이템 간 간격 */
+    margin-left: 5px;
+    border-radius: 5px;
+}
+
+.nav-link {
+    display: flex;
+    align-items: center;
+    height: 100%;
+    color: #6C3428;
+    padding-left: 20px;
+    font-size: 15px;
+    text-decoration: none;
+    transition: all 0.3s ease; /* 부드러운 전환 효과 */
+}
+
+.nav-link:hover {
+    font-weight: bold; /* 마우스 호버 시 볼드 처리 */
+    padding-left: 25px; /* 텍스트 왼쪽 패딩 증가 */
+    background-color: #e0d4cc; /* 배경색 변경 */
+}
+
+/* 갤러리 스타일링 */
+.gallery {
+    width: calc(100% - 960px); /* 전체 폭에서 사이드바와 챗 인터페이스의 폭을 뺀 값 */
+    margin-left: 240px; /* 사이드바 폭 */
+    margin-right: 720px; /* 채팅 인터페이스 폭 */
+    height: 100%;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-around;
+    padding: 15px;
+    background-color: #F5F5F5;
+}
+
+.gallery img {
+    width: 300px;
+    height: 300px;
+    margin: 10px;
+}
+
+/* 챗봇 창 스타일링 */
+.chat-interface {
+    width: 720px;
+    height: 100%;
+    background-color: #EDDFCC;
+    padding: 50px 50px 50px 50px;
+    position: fixed;
+    right: 0;
+    top: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+.chat-box {
+    flex-grow: 1;
+    overflow-y: auto;
+    padding-bottom: 60px; /* input area height */
+}
+
+
+.input-area {
+    display: flex;
+    margin-top: auto;
+    padding-bottom: 60px;
+}
+
+.text-input {
+    flex-grow: 1;
+    height: 50px;
+    margin-right: 10px;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+.message {
+    background-color: #FEFAF6;
+    padding: 10px;
+    margin-bottom: 10px;
+    font-size: 15px;
+}
+
+
+.send-button {
+    width: 100px;
+    height: 50px;
+    background-color: #C84848;
+    color: #FEFAF6;
+    font-size: 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.send-button:hover {
+    background-color: #a63636;
+}
+
+.reset-button {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    width: 40px;
+    height: 40px;
+    background-color: #FEFAF6;
+    color: #C84848;
+}
