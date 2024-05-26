@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Chatbot</title>
+    {% block scripts %}
+        <script>
+            function getCookie(name) {
+                var cookieValue = null;
+                if (document.cookie && document.cookie !== '') {
+                    var cookies = document.cookie.split(';');
+                    for (var i = 0; i < cookies.length; i++){
+                        var cookie = jQuery.trim(cookies[i]);
+                        if(cooke.substring(0, name.length+1) === (name + '=')) {
+                            cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                            break;
+                        }
+                    }
+                }
+                return cookieValue;
+            }
+
+            var csrftoken = getCookie('csrftoken');
+
+            var xhr;
+
+            function sendAsk(){
+                chattext = document.getElementById("chattext").value;
+                if(chattext == ""){
+                    document.getElementById("chattext").focus();
+                    return false;
+                }
+                //alert(ctext);
+
+                // 입력한 채팅 메시지가 계속 아래로 붙게 만듬
+                addtext = "<div style='margin:14px 0; text-align:right;'><span style='background-color:#3388cc; padding:5px 8px; border-radius:3px;'>" + chattext + "</span></div>"
+                document.getElementById("chatbox").innerHTML += addtext;
+
+                bottext = "<div style='margin:14px 0; text-align:left;'><span style='background-color:#DDDDDD; padding:5px 8px; border-radius:3px;'>" + "저는 챗봇입니다." + "</span></div>"
+                document.getElementById("chatbox").innerHTML += bottext;
+
+                // 메시지가 많아지면 아래쪽으로 스크롤이 따라가게 조정
+                mydiv = document.getElementById("chatbox");
+                mydiv.scrollTop = document.getElementById("chatbox").scrollHeight;
+
+                return false;
+
+                var strurl = "ask";
+                alert(strurl);
+                return false;
+
+                xhr = new XMLHttpRequest();
+                xhr.onreadystatechange = function() {
+                    if (xhr.readyState == 4) {
+                        var data = xhr.responseText;
+
+                        var obj = JSON.parse(data);
+                        alert(obj.result_msg);
+                        if(obj.flag == "1"){
+                            location.href = "/";
+                        }
+                    }
+                };
+                xhr.open("GET", strurl);
+                xhr.setRequestHeader("X-CSRFToken", csrftoken);
+                xhr.send(null);
+
+             }
+        </script>
+</head>
+
+
+
+</html>

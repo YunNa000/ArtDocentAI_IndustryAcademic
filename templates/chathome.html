@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Chatbot</title>
+
+    {% block scripts %}
+    <script>
+    // getCookie는 범용 코드
+    function getCookie(name) {
+                var cookieValue = null;
+                if (document.cookie && document.cookie !== '') {
+                    var cookies = document.cookie.split(';');
+                    for (var i = 0; i < cookies.length; i++){
+                        var cookie = jQuery.trim(cookies[i]);
+                        if(cooke.substring(0, name.length+1) === (name + '=')) {
+                            cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                            break;
+                        }
+                    }
+                }
+                return cookieValue;
+            }
+    
+    var csrftoken = getCookie('csrftoken');
+
+    function chatTrain(){
+
+        var strurl = "chattrain";
+        alert(strurl);
+
+        xhr = new XMLHttpRequest();
+        xhr.onreadystatechange = function() {
+            if (xhr.readyState == 4) { // 4: 정상
+                var data = xhr.responseText;
+
+                var obj = JSON.parse(data);
+                alert(obj.result);   
+            }
+        };
+        xhr.open("GET", strurl);
+        xhr.setRequestHeader("X-CSRFToken", csrftoken);
+        xhr.send(null);
+
+        
+    }
+    function sendAsk(){
+        chattext = document.getElementById("chattext").value;
+        if(chattext == ""){
+            document.getElementById("chattext").focus();
+            return false;
+        }
+        //alert(ctext);
+
+        // 입력한 채팅 메시지가 계속 아래로 붙게 만듬
+        addtext = "<div style='margin:14px 0; text-align:right;'><span style='background-color:#3388cc; padding:5px 8px; border-radius:3px;'>" + chattext + "</span></div>"
+        document.getElementById("chatbox").innerHTML += addtext;
+
+
+        var strurl = "chatanswer?chattext=" + chattext;
+        // alert(strurl);
+        // return false;
+
+        xhr = new XMLHttpRequest();
+        xhr.onreadystatechange = function() {
+            if (xhr.readyState == 4) {
+                var data = xhr.responseText;
+
+                var obj = JSON.parse(data);
+                //alert(obj.anstext);
+
+                bottext = "<div style='margin:14px 0; text-align:left;'><span style='background-color:#DDDDDD; padding:5px 8px; border-radius:3px;'>" + obj.anstext + "</span></div>"
+                document.getElementById("chatbox").innerHTML += bottext;
+
+                // 메시지가 많아지면 아래쪽으로 스크롤이 따라가게 조정
+                var mydiv = document.getElementById("chatbox");
+                mydiv.scrollTop = document.getElementById("chatbox").scrollHeight;
+            }
+        };
+        xhr.open("GET", strurl);
+        xhr.setRequestHeader("X-CSRFToken", csrftoken);
+        xhr.send(null);
+
+    }
+   
+    </script>
+    {% endblock %}
+
+
+    {% block styles %}
+    <style>
+        .chatheader {
+            position:fixed;
+            left:0;
+            top:0;
+            width:100%;
+            padding:10px 0;
+            background-color:#DDD;
+            color:#000;
+            text-align:center;
+        }
+
+        #chatbox {
+        overflow-y: auto; /* 세로 스크롤만 표시 */
+        }
+
+        .chatfooter {
+            position:fixed;
+            left:0;
+            bottom:0;
+            width:100%;
+            padding:10px 0;
+            background-color:#FFF;
+            color:#000;
+            text-align:center;
+        }
+       
+
+    </style>
+    {% endblock %}
+</head>
+
+<body style = "height:100%; background-color:#BBCCDD">
+
+    <div style="padding:0px;height:100%;background-color:#e8e8e8;"></divstyle></div>
+         <div class="chatheader">
+            <table width="100%">
+                <tr>
+                    <td width="50%" align="left">My chat</td>
+                    <td width="50%" align="right">
+                        <span onclick="chatTrain()" style="cursor: pointer;">Train</span></td>
+                </tr>
+            </table>
+         </div>
+         <div style="height:750px; margin-top:55px; background-color:#BBCCDD;" id="chatbox"></div>
+         <div class="chatfooter">
+            <table width="100%">
+                <tr>
+                    <td width="85%" align="left">
+                        <input type="text" id="chattext" style="padding:10px 0; width:100%; border:solid 0px #000;">
+                    </td>
+                    <td width="15%" align="right">
+                        <button onclick="sendAsk()" style="padding:10px 0; width:100%; cursor:pointer;">SEND</button>
+                    </td>
+                </tr>
+            </table>
+        </div>
+    </div>
+</body>
+</html>
