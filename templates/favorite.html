@@ -1,0 +1,72 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}
+Favorite - ChatBot Service
+{% endblock %}
+
+{% block content %}
+<div class="favorite-gallery-container">
+    {% block gallery_content %}
+    <div id="gallery" class="favorite-gallery"></div>
+    {% endblock %}
+</div>
+{% endblock %}
+
+
+{% block scripts %}
+<script>
+
+    var imagesList = [
+        [
+            '{% static "assets/imgdata/9886332401.png" %}',
+            '{% static "assets/imgdata/6314097491358110_1949232164.png" %}',
+            '{% static "assets/imgdata/21150542432613180_427128005.png" %}',
+            '{% static "assets/imgdata/33464962553633817_1968830977.png" %}',
+            '{% static "assets/imgdata/33571678858755115_1495166511.png" %}',
+            '{% static "assets/imgdata/33572095033992831_1203825347.png" %}',
+            '{% static "assets/imgdata/33572697087420928_2113376738.png" %}',
+            '{% static "assets/imgdata/34705573740579894_376972065.png" %}',
+            '{% static "assets/imgdata/34356097404599052_1810286742.png" %}',
+        ],
+        [
+            '{% static "assets/img/news-1.jpg" %}',
+            '{% static "assets/img/news-2.jpg" %}',
+            '{% static "assets/img/news-3.jpg" %}',
+            '{% static "assets/img/news-4.jpg" %}',
+            '{% static "assets/img/news-5.jpg" %}',
+            '{% static "assets/img/news-1.jpg" %}',
+            '{% static "assets/img/news-2.jpg" %}',
+            '{% static "assets/img/news-3.jpg" %}',
+            '{% static "assets/img/news-4.jpg" %}',
+        ]
+    ];
+    var currentImageSetIndex = 0;
+
+    function loadNextImages() {
+        var gallery = document.getElementById("gallery");
+        gallery.innerHTML = ""; // 기존 이미지 제거
+
+        if (currentImageSetIndex >= imagesList.length) {
+            currentImageSetIndex = 0; // 다시 처음부터 시작
+        }
+
+        var images = imagesList[currentImageSetIndex];
+        images.forEach(function(imageSrc, index) {
+            var imgContainer = document.createElement("div");
+            imgContainer.className = "gallery-item";
+
+            var imgElement = document.createElement("img");
+            imgElement.src = imageSrc;
+
+            imgContainer.appendChild(imgElement);
+            gallery.appendChild(imgContainer);
+        });
+        currentImageSetIndex++;
+    }
+
+    window.onload = function() {
+        loadNextImages(); // 페이지 로드 시 첫 번째 이미지 세트를 로드
+    }
+</script>
+{% endblock %}

@@ -17,6 +17,11 @@ def home(request):
 
     return render(request, "home.html", context)
 
+def favorite(request):
+    context={}
+
+    return render(request, "favorite.html", context)
+
 # csrf 토큰을 받으면 실행
 @csrf_exempt
 def chattrain(request):
