@@ -1,27 +1,33 @@
 {% extends 'base.html' %}
+{% load static %}
 
 {% block title %}
 Home - ChatBot Service
 {% endblock %}
 
-{% block gallery_content %}
-
-{% endblock %}
-
-{% block chat_content %}
-
-<div class="chat-train">
-    <button onclick="chatTrain()" class="train-button">Train Chatbot</button>
+{% block content %}
+<div class="gallery-container">
+    {% block gallery_content %}
+    <div id="gallery" class="gallery"></div>
+    {% endblock %}
 </div>
 
-<div id="chatbox" class="chat-box">
-    <!-- 챗봇 콘텐츠 내용 -->
-</div>
-<div class="input-area">
-    <input type="text" id="chattext" class="text-input" placeholder="Type your message here...">
-    <button onclick="sendAsk()" class="send-button">SEND</button>
-</div>
+<div class="chat-interface">
+    {% block chat_content %}
+    <div class="chat-train">
+        <button onclick="chatTrain()" class="train-button">Train Chatbot</button>
+    </div>
+    <button class="reset-button" onclick="resetChatbot()">&#x21bb;</button>
 
+    <div id="chatbox" class="chat-box">
+        <!-- 챗봇 콘텐츠 내용 -->
+    </div>
+    <div class="input-area">
+        <input type="text" id="chattext" class="text-input" placeholder="Type your message here...">
+        <button onclick="sendAsk()" class="send-button">SEND</button>
+    </div>
+    {% endblock %}
+</div>
 {% endblock %}
 
 {% block scripts %}
@@ -43,29 +49,26 @@ Home - ChatBot Service
 
     var csrftoken = getCookie('csrftoken');
 
-    function chatTrain(){
-
+    function chatTrain() {
         var strurl = "chattrain";
         alert(strurl);
 
-        xhr = new XMLHttpRequest();
+        var xhr = new XMLHttpRequest();
         xhr.onreadystatechange = function() {
-            if (xhr.readyState == 4) { // 4: 정상
+            if (xhr.readyState == 4 && xhr.status == 200) { // 4: 정상, 200: OK
                 var data = xhr.responseText;
-
                 var obj = JSON.parse(data);
-                alert(obj.result);   
+                alert(obj.result);
             }
         };
-        xhr.open("GET", strurl);
+        xhr.open("GET", strurl, true);
         xhr.setRequestHeader("X-CSRFToken", csrftoken);
         xhr.send(null);
-
-        }
+    }
 
     function sendAsk() {
         var chattext = document.getElementById("chattext").value;
-        if(chattext == "") {
+        if (chattext == "") {
             document.getElementById("chattext").focus();
             return false;
         }
@@ -75,32 +78,70 @@ Home - ChatBot Service
         document.getElementById("chatbox").innerHTML += addtext;
 
         // 서버로부터 응답을 받는 대신에 임시 응답 생성
-        var bottext = "<div style='margin:20px; text-align:left; display:flex; align-items:center;'><img src='/static/assets/img/ai_img.jpeg' alt='AI Image' style='width: 40px; height: 40px; margin-right: 10px; border-radius: 50%;'><span style='background-color:#FEFAF6; padding:5px 8px; border-radius:3px; display:inline-block; max-width:60%; word-wrap:break-word;'>저는 챗봇입니다.</span></div>";
+        var bottext = "<div style='margin:20px; text-align:left; display:flex; align-items:center;'><img src='{% static 'assets/img/ai_img.jpeg' %}' alt='AI Image' style='width: 40px; height: 40px; margin-right: 10px; border-radius: 50%;'><span style='background-color:#FEFAF6; padding:5px 8px; border-radius:3px; display:inline-block; max-width:60%; word-wrap:break-word;'>저는 챗봇입니다.</span></div>";
         document.getElementById("chatbox").innerHTML += bottext;
 
         // 메시지가 많아지면 아래쪽으로 스크롤이 따라가게 조정
         var mydiv = document.getElementById("chatbox");
         mydiv.scrollTop = document.getElementById("chatbox").scrollHeight;
 
-        // 실제 서버와의 통신을 추가하려면 이 부분에 AJAX 요청을 추가
-        /*
-        var strurl = "ask";
-        xhr = new XMLHttpRequest();
-        xhr.onreadystatechange = function() {
-            if (xhr.readyState == 4) {
-                var data = xhr.responseText;
-                var obj = JSON.parse(data);
-                var bottext = "<div style='margin:14px 0; text-align:left;'><span style='background-color:#DDDDDD; padding:5px 8px; border-radius:3px;'>" + obj.anstext + "</span></div>";
-                document.getElementById("chatbox").innerHTML += bottext;
-            }
-        };
-        xhr.open("GET", strurl);
-        xhr.setRequestHeader("X-CSRFToken", csrftoken);
-        xhr.send(null);
-        */
-
+        // 입력 필드 초기화
         document.getElementById("chattext").value = "";
-        return false;
+
+        // 다음 이미지를 갤러리에 추가
+        loadNextImages();
+    }
+
+    var imagesList = [
+        [
+            '{% static "assets/imgdata/9886332401.png" %}',
+            '{% static "assets/imgdata/6314097491358110_1949232164.png" %}',
+            '{% static "assets/imgdata/21150542432613180_427128005.png" %}',
+            '{% static "assets/imgdata/33464962553633817_1968830977.png" %}',
+            '{% static "assets/imgdata/33571678858755115_1495166511.png" %}',
+            '{% static "assets/imgdata/33572095033992831_1203825347.png" %}',
+            '{% static "assets/imgdata/33572697087420928_2113376738.png" %}',
+            '{% static "assets/imgdata/34705573740579894_376972065.png" %}',
+            '{% static "assets/imgdata/34356097404599052_1810286742.png" %}',
+        ],
+        [
+            '{% static "assets/img/news-1.jpg" %}',
+            '{% static "assets/img/news-2.jpg" %}',
+            '{% static "assets/img/news-3.jpg" %}',
+            '{% static "assets/img/news-4.jpg" %}',
+            '{% static "assets/img/news-5.jpg" %}',
+            '{% static "assets/img/news-1.jpg" %}',
+            '{% static "assets/img/news-2.jpg" %}',
+            '{% static "assets/img/news-3.jpg" %}',
+            '{% static "assets/img/news-4.jpg" %}',
+        ]
+    ];
+    var currentImageSetIndex = 0;
+
+    function loadNextImages() {
+        var gallery = document.getElementById("gallery");
+        gallery.innerHTML = ""; // 기존 이미지 제거
+
+        if (currentImageSetIndex >= imagesList.length) {
+            currentImageSetIndex = 0; // 다시 처음부터 시작
+        }
+
+        var images = imagesList[currentImageSetIndex];
+        images.forEach(function(imageSrc, index) {
+            var imgContainer = document.createElement("div");
+            imgContainer.className = "gallery-item";
+
+            var imgElement = document.createElement("img");
+            imgElement.src = imageSrc;
+
+            imgContainer.appendChild(imgElement);
+            gallery.appendChild(imgContainer);
+        });
+        currentImageSetIndex++;
+    }
+
+    window.onload = function() {
+        loadNextImages(); // 페이지 로드 시 첫 번째 이미지 세트를 로드
     }
 </script>
 {% endblock %}

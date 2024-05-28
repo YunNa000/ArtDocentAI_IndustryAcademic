@@ -1,7 +1,15 @@
+body {
+    font-family: Arial, sans-serif;
+    margin: 0; /* 기본 마진 제거 */
+    height: 100vh; /* 전체 화면 높이 설정 */
+    overflow: hidden; /* 스크롤 바 제거 */
+    display: flex;
+}
+
 /* 메뉴 탭 스타일링 */
 .sidebar {
     width: 240px;
-    height: 100%;
+    height: 100vh;
     background-color: #6C3428;
     color: #FEFAF6;
     font-family: 'Pretendard', sans-serif;
@@ -9,6 +17,8 @@
     position: fixed;
     top: 0;
     left: 0;
+    display: flex;
+    flex-direction: column;
 }
 
 .menu-title {
@@ -22,6 +32,7 @@
     list-style: none;
     padding: 0;
     margin: 0;
+    flex-grow: 1; /* 남은 공간 채우기 */
 }
 
 .nav-item {
@@ -50,30 +61,157 @@
     background-color: #e0d4cc; /* 배경색 변경 */
 }
 
-/* 갤러리 스타일링 */
-.gallery {
-    width: calc(100% - 960px); /* 전체 폭에서 사이드바와 챗 인터페이스의 폭을 뺀 값 */
-    margin-left: 240px; /* 사이드바 폭 */
-    margin-right: 720px; /* 채팅 인터페이스 폭 */
-    height: 100%;
+/* .gallery-container {
+    margin-left: 260px; 
+    margin-right: 10px; 
+    padding: 20px;
+    flex-grow: 1; 
     display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    justify-content: space-around;
-    padding: 15px;
-    background-color: #F5F5F5;
+    flex-direction: column;
+}
+*/
+/*
+.gallery {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    height: 100%;
 }
 
-.gallery img {
-    width: 300px;
-    height: 300px;
-    margin: 10px;
+.gallery-item {
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.35);
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-grow: 1; 
+    
 }
+
+.gallery-item img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 8px;
+    transition: transform 0.3s ease;
+}
+
+
+.item1 {
+    grid-column: 1 / 2;
+    grid-row: 1 / 2;
+    height: 15vh;
+}
+
+.item2 {
+    grid-column: 2 / 4;
+    grid-row: 1 / 2;
+    height: 15vh;
+}
+
+.item3 {
+    grid-column: 1 / 3;
+    grid-row: 2 / 3;
+    height: 25vh;
+}
+
+.item4 {
+    grid-column: 3 / 4;
+    grid-row: 2 / 3;
+    height: 25vh;
+}
+
+.item5 {
+    grid-column: 1 / 2;
+    grid-row: 3 / 4;
+    height: 15vh;
+}
+
+.item6 {
+    grid-column: 2 / 3;
+    grid-row: 3 / 4;
+    height: 15vh;
+}
+
+.item7 {
+    grid-column: 3 / 4;
+    grid-row: 3 / 4;
+    height: 15vh;
+}
+
+.item8 {
+    grid-column: 1 / 4;
+    grid-row: 4 / 5;
+    height: 30vh;
+}
+
+.item9 {
+    grid-column: 1 / 4;
+    grid-row: 5 / 6;
+    height: 30vh;
+}
+
+.hidden {
+    display: none;
+} */
+
+.gallery-container {
+    margin-left: 240px; /* 사이드바 폭 */
+    margin-right: 400px; /* 채팅 인터페이스와의 간격 */
+    padding: 20px;
+    flex-grow: 1; /* 남은 공간 채우기 */
+    display: flex;
+    flex-direction: column;
+}
+
+.gallery {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr); /* 3x3 그리드 */
+    grid-template-rows: repeat(3, 1fr); /* 3x3 그리드 */
+    gap: 10px;
+    width: 100%;
+    height: 100%; /* 전체 높이를 차지하도록 설정 */
+}
+
+.gallery-item {
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.gallery-item img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover; /* 이미지가 아이템 크기에 맞춰지도록 설정 */
+    border-radius: 8px;
+    transition: transform 0.3s ease;
+}
+
+.favorite-gallery-container {
+    margin-left: 240px; /* 사이드바 폭 */
+    margin-right: 30px; 
+    padding: 20px;
+    flex-grow: 1; /* 남은 공간 채우기 */
+    display: flex;
+    flex-direction: column;
+}
+
+.favorite-gallery{
+    display: grid;
+    grid-template-columns: repeat(3, 1fr); /* 3x3 그리드 */
+    grid-template-rows: repeat(3, 1fr); /* 3x3 그리드 */
+    gap: 10px;
+    width: 100%;
+    height: 100%; /* 전체 높이를 차지하도록 설정 */
+}
+
 
 /* 챗봇 창 스타일링 */
 .chat-interface {
-    width: 720px;
-    height: 100%;
+    width: 300px; /* 폭을 줄여서 갤러리 공간 확보 */
+    height: 100vh;
     background-color: #EDDFCC;
     padding: 50px 50px 50px 50px;
     position: fixed;
@@ -88,7 +226,6 @@
     overflow-y: auto;
     padding-bottom: 60px; /* input area height */
 }
-
 
 .input-area {
     display: flex;
@@ -111,7 +248,6 @@
     margin-bottom: 10px;
     font-size: 15px;
 }
-
 
 .send-button {
     width: 100px;

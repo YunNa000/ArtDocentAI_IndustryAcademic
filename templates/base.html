@@ -21,23 +21,14 @@
                 <a href="#" class="nav-link">작가 소개</a>
             </li>
             <li class="nav-item">
-                <a href="#" class="nav-link">선호 작품</a>
+                <a href="/favorite" class="nav-link">선호 작품</a>
             </li>
         </ul>
         {% endblock %}
     </div>
 
-    <div class="gallery">
-        {% block gallery_content %}
-        <!-- 갤러리 콘텐츠 내용 -->
-        {% endblock %}
-    </div>
-
-    <div class="chat-interface">
-        {% block chat_content %}
-        
-        {% endblock %}
-    </div>
+    {% block content %}
+    {% endblock %}
 
     {% block scripts %}
     {% endblock %}
