@@ -6,6 +6,7 @@
     {% load static %}
     <link href="{% static 'css/styles.css' %}" rel="stylesheet">
     <title>{% block title %}Home - ChatBot Service{% endblock %}</title>
+    {% block styles %}{% endblock %}  <!-- CSS Injection Point -->
 </head>
 <body>
     <div class="sidebar">
@@ -15,10 +16,13 @@
                 Menu
             </div>
             <li class="nav-item">
-                <a href="#" class="nav-link active">팀원 소개</a>
+                <a href="/home" class="nav-link">메인 화면</a>
             </li>
             <li class="nav-item">
-                <a href="#" class="nav-link">작가 소개</a>
+                <a href="/IntroTeam" class="nav-link">팀원 소개</a>
+            </li>
+            <li class="nav-item">
+                <a href="/IntroArtist" class="nav-link">작가 소개</a>
             </li>
             <li class="nav-item">
                 <a href="/favorite" class="nav-link">선호 작품</a>
