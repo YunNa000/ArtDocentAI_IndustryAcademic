@@ -22,6 +22,17 @@ def favorite(request):
 
     return render(request, "favorite.html", context)
 
+def IntroTeam(request):
+    context={}
+    
+    return render(request, "IntroTeam.html", context)
+
+def IntroArtist(request):
+    context={}
+    
+    return render(request, "IntroArtist.html", context)
+
+
 # csrf 토큰을 받으면 실행
 @csrf_exempt
 def chattrain(request):
