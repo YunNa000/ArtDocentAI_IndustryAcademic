@@ -17,7 +17,7 @@ Home - ChatBot Service
     <div class="chat-train">
         <button onclick="chatTrain()" class="train-button">Train Chatbot</button>
     </div>
-    <button class="reset-button" onclick="resetChatbot()">&#x21bb;</button>
+    <button class="reset-button" onclick="resetFavorites()">&#x21bb;</button>
 
     <div id="chatbox" class="chat-box">
         <!-- 챗봇 콘텐츠 내용 -->
@@ -73,22 +73,35 @@ Home - ChatBot Service
             return false;
         }
 
-        // 입력한 채팅 메시지가 계속 아래로 붙게 만듬
         var addtext = "<div style='margin:20px 20px; text-align:right;'><span style='background-color:#FFFFFF; padding:5px 8px; border-radius:3px; display:inline-block; max-width:60%; word-wrap:break-word;'>" + chattext + "</span></div>";
         document.getElementById("chatbox").innerHTML += addtext;
 
-        // 서버로부터 응답을 받는 대신에 임시 응답 생성
         var bottext = "<div style='margin:20px; text-align:left; display:flex; align-items:center;'><img src='{% static 'assets/img/ai_img.jpeg' %}' alt='AI Image' style='width: 40px; height: 40px; margin-right: 10px; border-radius: 50%;'><span style='background-color:#FEFAF6; padding:5px 8px; border-radius:3px; display:inline-block; max-width:60%; word-wrap:break-word;'>저는 챗봇입니다.</span></div>";
         document.getElementById("chatbox").innerHTML += bottext;
 
-        // 메시지가 많아지면 아래쪽으로 스크롤이 따라가게 조정
         var mydiv = document.getElementById("chatbox");
         mydiv.scrollTop = document.getElementById("chatbox").scrollHeight;
 
-        // 입력 필드 초기화
         document.getElementById("chattext").value = "";
 
-        // 다음 이미지를 갤러리에 추가
+        loadNextImages();
+    }
+
+    function addToFavorites(imageSrc, heartButton) {
+        let favorites = JSON.parse(localStorage.getItem('favorites')) || [];
+        if (!favorites.includes(imageSrc)) {
+            favorites.push(imageSrc);
+            localStorage.setItem('favorites', JSON.stringify(favorites));
+            heartButton.innerHTML = "&#10084;"; // 빨간 하트로 변경
+            heartButton.classList.add('favorite');
+        } else {
+            alert('Already in favorites!');
+        }
+    }
+
+    function resetFavorites() {
+        localStorage.removeItem('favorites');
+        alert('Favorites have been reset!');
         loadNextImages();
     }
 
@@ -120,13 +133,14 @@ Home - ChatBot Service
 
     function loadNextImages() {
         var gallery = document.getElementById("gallery");
-        gallery.innerHTML = ""; // 기존 이미지 제거
+        gallery.innerHTML = ""; 
 
         if (currentImageSetIndex >= imagesList.length) {
-            currentImageSetIndex = 0; // 다시 처음부터 시작
+            currentImageSetIndex = 0; 
         }
 
         var images = imagesList[currentImageSetIndex];
+        let favorites = JSON.parse(localStorage.getItem('favorites')) || [];
         images.forEach(function(imageSrc, index) {
             var imgContainer = document.createElement("div");
             imgContainer.className = "gallery-item";
@@ -134,14 +148,52 @@ Home - ChatBot Service
             var imgElement = document.createElement("img");
             imgElement.src = imageSrc;
 
+            var heartButton = document.createElement("button");
+            heartButton.className = "heart-button";
+            heartButton.innerHTML = "&#9825;"; // 빈 하트
+            if (favorites.includes(imageSrc)) {
+                heartButton.innerHTML = "&#10084;"; // 빨간 하트
+                heartButton.classList.add('favorite');
+            }
+            heartButton.onclick = function() {
+                addToFavorites(imageSrc, heartButton);
+            };
+
             imgContainer.appendChild(imgElement);
+            imgContainer.appendChild(heartButton);
             gallery.appendChild(imgContainer);
         });
         currentImageSetIndex++;
     }
 
     window.onload = function() {
-        loadNextImages(); // 페이지 로드 시 첫 번째 이미지 세트를 로드
+        loadNextImages(); 
     }
 </script>
+<style>
+    .gallery-item {
+        position: relative;
+        display: inline-block;
+        margin: 10px;
+    }
+
+    .heart-button {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        background: none;
+        border: none;
+        font-size: 24px;
+        cursor: pointer;
+        transition: color 0.3s ease;
+    }
+
+    .heart-button.favorite {
+        color: red;
+    }
+
+    .heart-button:hover {
+        color: pink;
+    }
+</style>
 {% endblock %}

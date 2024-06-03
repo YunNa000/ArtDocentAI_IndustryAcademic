@@ -6,131 +6,166 @@
 {% endblock %}
 
 {% block content %}
+<style>
+    .gallery-container {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 20px;
+        justify-content: center;
+    }
+
+    .grid-item {
+        width: 200px;
+        text-align: center;
+    }
+
+    .grid-item img {
+        width: 100%;
+        height: auto;
+        transition: transform 0.3s ease;
+    }
+
+    .grid-item img:hover {
+        transform: scale(1.1);
+    }
+
+    .modal {
+        display: none;
+        position: fixed;
+        z-index: 1;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        overflow: auto;
+        background-color: rgba(0, 0, 0, 0.8);
+        align-items: center;
+        justify-content: center;
+    }
+
+    .modal-content {
+        background-color: #fefefe;
+        margin: auto;
+        padding: 20px;
+        border: 1px solid #888;
+        width: 80%;
+        max-width: 1000px;
+        position: relative;
+        text-align: center;
+    }
+
+    .modal-content img {
+        width: 100%;
+        height: 500px;
+        object-fit: cover;
+    }
+
+    .close-btn {
+        position: absolute;
+        top: 10px;
+        right: 20px;
+        color: #aaa;
+        font-size: 28px;
+        font-weight: bold;
+        text-decoration: none;
+    }
+
+    .close-btn:hover,
+    .close-btn:focus {
+        color: black;
+        cursor: pointer;
+    }
+
+    .view-artworks-btn {
+        display: inline-block;
+        padding: 10px 20px;
+        margin-top: 20px;
+        background-color: #007bff;
+        color: white;
+        text-decoration: none;
+        border-radius: 5px;
+        transition: background-color 0.3s ease;
+    }
+
+    .view-artworks-btn:hover {
+        background-color: #0056b3;
+    }
+
+    .artworks-list {
+        display: none;
+        padding: 20px;
+        background-color: white;
+        border-top: 1px solid #ccc;
+        text-align: center;
+    }
+
+    .artworks-list img {
+        width: 450px;
+        height: auto;
+        margin: 10px;
+    }
+</style>
+
 <div class="gallery-container">
     <div class="grid-item">
-        <a href="#modal1">
+        <a href="#modal1" class="open-modal">
             <img src="{% static 'assets/img/aiwoman.webp' %}" alt="Artist 1">
             <p>Artist 1</p>
         </a>
         <div id="modal1" class="modal">
             <div class="modal-content">
                 <a href="#" class="close-btn">&times;</a>
-                <img src="{% static 'assets/img/aiwoman.webp' %}" alt="Artist 1" style="width: 100%; max-height: 300px; object-fit: cover;">
+                <img src="{% static 'assets/img/aiwoman.webp' %}" alt="Artist 1">
                 <h2>Artist 1</h2>
-                <p>Here is a description about Artist 1...Here is a description about Artist 1...
-                    Here is a description about Artist 1...Here is a description about Artist 1...
-                    Here is a description about Artist 1...Here is a description about Artist 1...
-                    Here is a description about Artist 1...Here is a description about Artist 1...</p>
-                <a href="#artist art">
-                    <h3>작가 작품 보러가기<h3></a href>
+                <p>Here is a description about Artist 1...</p>
+                <a href="#artworks1" class="view-artworks-btn">작가 작품 보러가기</a>
             </div>
         </div>
-    </div>
-    
-    <div class="grid-item">
-        <a href="#modal2">
-            <img src="{% static 'assets/img/aiwoman.webp' %}" alt="Artist 2">
-            <p>Artist 2</p>
-        </a>
-        <div id="modal2" class="modal">
+        <div id="artworks1" class="artworks-list modal">
             <div class="modal-content">
                 <a href="#" class="close-btn">&times;</a>
-                <img src="{% static 'assets/img/aiwoman.webp' %}" alt="Artist 2" style="width: 100%; max-height: 300px; object-fit: cover;">
-                <h2>Artist 2</h2>
-                <p>Here is a description about Artist 2...</p>
-                <a href="#artist art">
-                    <h3>작가 작품 보러가기<h3></a href>
+                <div class="row">
+                    <img src="{% static 'assets/imgdata/9886332401.png' %}" alt="Artwork 1" class="artwork-image">
+                    <img src="{% static 'assets/imgdata/9886332401.png' %}" alt="Artwork 2" class="artwork-image">
+                </div>
             </div>
         </div>
     </div>
-    
-    <div class="grid-item">
-        <a href="#modal3">
-            <img src="{% static 'assets/img/aiwoman.webp' %}" alt="Artist 3">
-            <p>Artist 3</p>
-        </a>
-        <div id="modal3" class="modal">
-            <div class="modal-content">
-                <a href="#" class="close-btn">&times;</a>
-                <img src="{% static 'assets/img/aiwoman.webp' %}" alt="Artist 3" style="width: 100%; max-height: 300px; object-fit: cover;">
-                <h2>Artist 3</h2>
-                <p>Here is a description about Artist 3...</p>
-                <a href="#artist art">
-                    <h3>작가 작품 보러가기<h3></a href>
-            </div>
-        </div>
-    </div>
-    
-    <div class="grid-item">
-        <a href="#modal4">
-            <img src="{% static 'assets/img/aiwoman.webp' %}" alt="Artist 4">
-            <p>Artist 4</p>
-        </a>
-        <div id="modal4" class="modal">
-            <div class="modal-content">
-                <a href="#" class="close-btn">&times;</a>
-                <img src="{% static 'assets/img/aiwoman.webp' %}" alt="Artist 4" style="width: 100%; max-height: 300px; object-fit: cover;">
-                <h2>Artist 4</h2>
-                <p>Here is a description about Artist 4...</p>
-                <a href="#artist art">
-                    <h3>작가 작품 보러가기<h3></a href>
-            </div>
-        </div>
-    </div>
-    
 </div>
-<style>
-    body {
-        font-family: Arial, sans-serif;
-    }
-    .gallery-container {
-        display: grid;
-        grid-template-columns: repeat(2, 1fr);
-        gap: 20px;
-        padding: 20px;
-    }
-    .grid-item img {
-        max-width: 100%; /* Adjust image size */
-        height: auto;
-        border-radius: 8px;
-        transition: 0.3s;
-    }
-    .grid-item img:hover {
-        transform: scale(1.05);
-    }
-    .modal {
-        display: none;
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background-color: rgba(0, 0, 0, 0.8);
-        z-index: 1000;
-        padding-top: 100px;
-    }
-    .modal:target {
-        display: block;
-    }
-    .modal-content {
-        background-color: white;
-        margin: auto;
-        padding: 20px;
-        border-radius: 8px;
-        width: 50%; /* Adjust width as needed */
-        position: relative;
-    }
-    .close-btn {
-        position: absolute;
-        top: 10px;
-        right: 20px;
-        font-size: 30px;
-        text-decoration: none;
-        color: black;
-    }
-    .close-btn:hover {
-        color: red;
-        cursor: pointer;
-    }
-</style>
+
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        var modals = document.querySelectorAll('.modal');
+        var closeButtons = document.querySelectorAll('.close-btn');
+        var artworkButtons = document.querySelectorAll('.view-artworks-btn');
+
+        document.querySelectorAll('.grid-item a').forEach(function (item) {
+            item.addEventListener('click', function (e) {
+                e.preventDefault();
+                var modal = document.querySelector(this.getAttribute('href'));
+                modal.style.display = 'flex';
+            });
+        });
+
+        closeButtons.forEach(function (btn) {
+            btn.addEventListener('click', function (e) {
+                e.preventDefault();
+                var modal = this.closest('.modal');
+                modal.style.display = 'none';
+                var artworksList = modal.querySelector('.artworks-list');
+                artworksList.style.display = 'none';
+            });
+        });
+
+        artworkButtons.forEach(function (btn) {
+            btn.addEventListener('click', function (e) {
+                e.preventDefault();
+                var artworksList = this.closest('.modal').querySelector('.artworks-list');
+                artworksList.style.display = 'block';
+                this.scrollIntoView({ behavior: 'smooth' });
+            });
+        });
+    });
+</script>
 {% endblock %}
