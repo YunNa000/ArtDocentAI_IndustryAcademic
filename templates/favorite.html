@@ -13,7 +13,6 @@ Favorite - ChatBot Service
 </div>
 {% endblock %}
 
-
 {% block scripts %}
 <script>
     function loadFavorites() {
@@ -31,10 +30,33 @@ Favorite - ChatBot Service
                 var imgElement = document.createElement("img");
                 imgElement.src = imageSrc;
 
+                // Create heart icon
+                var heartIcon = document.createElement("span");
+                heartIcon.className = "heart-icon";
+                heartIcon.innerHTML = "❤️";
+                heartIcon.onclick = function() { toggleFavorite(imageSrc); };
+
                 imgContainer.appendChild(imgElement);
+                imgContainer.appendChild(heartIcon);
                 gallery.appendChild(imgContainer);
             });
         }
+    }
+
+    function toggleFavorite(imageSrc) {
+        let favorites = JSON.parse(localStorage.getItem('favorites')) || [];
+        const index = favorites.indexOf(imageSrc);
+
+        if (index > -1) {
+            // Remove favorite if it exists
+            favorites.splice(index, 1);
+        } else {
+            // Add to favorites if it doesn't exist
+            favorites.push(imageSrc);
+        }
+
+        localStorage.setItem('favorites', JSON.stringify(favorites));
+        loadFavorites();
     }
 
     window.onload = function() {
@@ -46,6 +68,19 @@ Favorite - ChatBot Service
         position: relative;
         display: inline-block;
         margin: 10px;
+    }
+    .heart-icon {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        cursor: pointer;
+        font-size: 24px;
+        color: red;
+        transition: transform 0.3s ease, color 0.3s ease;
+    }
+    .heart-icon:hover {
+        transform: scale(1.2);
+        color: pink;
     }
 </style>
 {% endblock %}

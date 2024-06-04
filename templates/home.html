@@ -87,16 +87,23 @@ Home - ChatBot Service
         loadNextImages();
     }
 
-    function addToFavorites(imageSrc, heartButton) {
+    function toggleFavorite(imageSrc, heartButton) {
         let favorites = JSON.parse(localStorage.getItem('favorites')) || [];
-        if (!favorites.includes(imageSrc)) {
+        const index = favorites.indexOf(imageSrc);
+
+        if (index > -1) {
+            // Remove favorite if it exists
+            favorites.splice(index, 1);
+            heartButton.innerHTML = "&#9825;"; // 빈 하트로 변경
+            heartButton.classList.remove('favorite');
+        } else {
+            // Add to favorites if it doesn't exist
             favorites.push(imageSrc);
-            localStorage.setItem('favorites', JSON.stringify(favorites));
             heartButton.innerHTML = "&#10084;"; // 빨간 하트로 변경
             heartButton.classList.add('favorite');
-        } else {
-            alert('Already in favorites!');
         }
+
+        localStorage.setItem('favorites', JSON.stringify(favorites));
     }
 
     function resetFavorites() {
@@ -156,7 +163,7 @@ Home - ChatBot Service
                 heartButton.classList.add('favorite');
             }
             heartButton.onclick = function() {
-                addToFavorites(imageSrc, heartButton);
+                toggleFavorite(imageSrc, heartButton);
             };
 
             imgContainer.appendChild(imgElement);
