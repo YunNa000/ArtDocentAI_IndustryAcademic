@@ -36,9 +36,9 @@ Home - ChatBot Service
         var cookieValue = null;
         if (document.cookie && document.cookie !== '') {
             var cookies = document.cookie.split(';');
-            for (var i = 0; i < cookies.length; i++){
+            for (var i = 0; i < cookies.length; i++) {
                 var cookie = jQuery.trim(cookies[i]);
-                if(cookie.substring(0, name.length + 1) === (name + '=')) {
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
                     cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
                     break;
                 }
@@ -54,7 +54,7 @@ Home - ChatBot Service
         alert(strurl);
 
         var xhr = new XMLHttpRequest();
-        xhr.onreadystatechange = function() {
+        xhr.onreadystatechange = function () {
             if (xhr.readyState == 4 && xhr.status == 200) { // 4: 정상, 200: OK
                 var data = xhr.responseText;
                 var obj = JSON.parse(data);
@@ -76,15 +76,36 @@ Home - ChatBot Service
         var addtext = "<div style='margin:20px 20px; text-align:right;'><span style='background-color:#FFFFFF; padding:5px 8px; border-radius:3px; display:inline-block; max-width:60%; word-wrap:break-word;'>" + chattext + "</span></div>";
         document.getElementById("chatbox").innerHTML += addtext;
 
-        var bottext = "<div style='margin:20px; text-align:left; display:flex; align-items:center;'><img src='{% static 'assets/img/ai_img.jpeg' %}' alt='AI Image' style='width: 40px; height: 40px; margin-right: 10px; border-radius: 50%;'><span style='background-color:#FEFAF6; padding:5px 8px; border-radius:3px; display:inline-block; max-width:60%; word-wrap:break-word;'>저는 챗봇입니다.</span></div>";
-        document.getElementById("chatbox").innerHTML += bottext;
 
-        var mydiv = document.getElementById("chatbox");
-        mydiv.scrollTop = document.getElementById("chatbox").scrollHeight;
+        fetch('/chatanswer', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'X-CSRFToken': csrftoken
+            },
+            body: new URLSearchParams({
+                'chattext': chattext
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            var bert_response = "<div style='margin:20px; text-align:left; display:flex; flex-direction: column; align-items: flex-start;'><img src='{% static 'assets/img/ai_img.jpeg' %}' alt='AI Image' style='width: 40px; height: 40px; margin-right: 10px; border-radius: 50%;'><span style='background-color:#FEFAF6; padding:5px 8px; border-radius:3px; display:inline-block; max-width:60%; word-wrap:break-word;'>";
+            bert_response += "설명: " + data.bert_response.description + "<br>";
+            bert_response += "작가: " + data.bert_response.author + "<br>";
+            bert_response += "제목: " + data.bert_response.title + "<br>";
+            bert_response += "유사도 점수: " + data.bert_response.similarity_score + "<br>";
+            bert_response += "<img src='/static/Images/" + data.bert_response.image_file + "' style='width:300px;'></span></div>";
 
-        document.getElementById("chattext").value = "";
+            var gpt_response = "<div style='margin:20px; text-align:left; display:flex; align-items:center;'><img src='{% static 'assets/img/ai_img.jpeg' %}' alt='AI Image' style='width: 40px; height: 40px; margin-right: 10px; border-radius: 50%;'><span style='background-color:#FEFAF6; padding:5px 8px; border-radius:3px; display:inline-block; max-width:60%; word-wrap:break-word;'>" + data.gpt_response + "</span></div>";
 
-        loadNextImages();
+            document.getElementById("chatbox").innerHTML += bert_response;
+            document.getElementById("chatbox").innerHTML += gpt_response;
+
+            var mydiv = document.getElementById("chatbox");
+            mydiv.scrollTop = document.getElementById("chatbox").scrollHeight;
+            document.getElementById("chattext").value = "";
+        })
+        .catch(error => console.error('Error:', error));
     }
 
     function addToFavorites(imageSrc, heartButton) {
@@ -133,15 +154,15 @@ Home - ChatBot Service
 
     function loadNextImages() {
         var gallery = document.getElementById("gallery");
-        gallery.innerHTML = ""; 
+        gallery.innerHTML = "";
 
         if (currentImageSetIndex >= imagesList.length) {
-            currentImageSetIndex = 0; 
+            currentImageSetIndex = 0;
         }
 
         var images = imagesList[currentImageSetIndex];
         let favorites = JSON.parse(localStorage.getItem('favorites')) || [];
-        images.forEach(function(imageSrc, index) {
+        images.forEach(function (imageSrc, index) {
             var imgContainer = document.createElement("div");
             imgContainer.className = "gallery-item";
 
@@ -155,7 +176,7 @@ Home - ChatBot Service
                 heartButton.innerHTML = "&#10084;"; // 빨간 하트
                 heartButton.classList.add('favorite');
             }
-            heartButton.onclick = function() {
+            heartButton.onclick = function () {
                 addToFavorites(imageSrc, heartButton);
             };
 
@@ -166,8 +187,8 @@ Home - ChatBot Service
         currentImageSetIndex++;
     }
 
-    window.onload = function() {
-        loadNextImages(); 
+    window.onload = function () {
+        loadNextImages();
     }
 </script>
 <style>

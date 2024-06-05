@@ -8,6 +8,6 @@ urlpatterns = [
     path('favorite',views.favorite, name='favorite'),
     path('IntroTeam',views.IntroTeam, name='IntroTeam'),
     path('IntroArtist',views.IntroArtist, name='IntroArtist'),
-    path('chattrain', views.chattrain, name='chattrain'),
     path('chatanswer', views.chatanswer, name='chatanswer'),
+    # path('chattrain', views.chattrain, name='chattrain'),
 ]
