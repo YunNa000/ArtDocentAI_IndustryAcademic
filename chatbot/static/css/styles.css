@@ -158,7 +158,11 @@ body {
 
 .gallery-container {
     margin-left: 240px; /* 사이드바 폭 */
+<<<<<<< HEAD
     margin-right: 400px; /* 채팅 인터페이스와의 간격 */
+=======
+    margin-right: 700px; /* 채팅 인터페이스와의 간격 */
+>>>>>>> ed168e23322c5a425e3ab7c7453694bcfff73be9
     padding: 20px;
     flex-grow: 1; /* 남은 공간 채우기 */
     display: flex;
@@ -208,10 +212,8 @@ body {
     height: 100%; /* 전체 높이를 차지하도록 설정 */
 }
 
-
-/* 챗봇 창 스타일링 */
 .chat-interface {
-    width: 300px; /* 폭을 줄여서 갤러리 공간 확보 */
+    width: 600px; /* 폭을 늘려서 갤러리 공간 확보 */
     height: 100vh;
     background-color: #EDDFCC;
     padding: 50px 50px 50px 50px;
