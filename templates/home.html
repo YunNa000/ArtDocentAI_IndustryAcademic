@@ -76,7 +76,6 @@ Home - ChatBot Service
         var addtext = "<div style='margin:20px 20px; text-align:right;'><span style='background-color:#FFFFFF; padding:5px 8px; border-radius:3px; display:inline-block; max-width:60%; word-wrap:break-word;'>" + chattext + "</span></div>";
         document.getElementById("chatbox").innerHTML += addtext;
 
-
         fetch('/chatanswer', {
             method: 'POST',
             headers: {
@@ -101,15 +100,12 @@ Home - ChatBot Service
 
                 document.getElementById("chatbox").innerHTML += gpt_response;
 
-                
-                
-                
                 var mydiv = document.getElementById("chatbox");
                 mydiv.scrollTop = document.getElementById("chatbox").scrollHeight;
                 document.getElementById("chattext").value = "";
             })
             .catch(error => console.error('Error:', error));
-        }
+    }
 
     function toggleFavorite(imageSrc, heartButton) {
         let favorites = JSON.parse(localStorage.getItem('favorites')) || [];
@@ -187,7 +183,7 @@ Home - ChatBot Service
                 heartButton.classList.add('favorite');
             }
             heartButton.onclick = function () {
-                addToFavorites(imageSrc, heartButton);
+                toggleFavorite(imageSrc, heartButton);
             };
 
             imgContainer.appendChild(imgElement);
