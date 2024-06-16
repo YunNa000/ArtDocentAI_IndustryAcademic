@@ -89,24 +89,27 @@ Home - ChatBot Service
         })
         .then(response => response.json())
         .then(data => {
-            var bert_response = "<div style='margin:20px; text-align:left; display:flex; flex-direction: column; align-items: flex-start;'><img src='{% static 'assets/img/ai_img.jpeg' %}' alt='AI Image' style='width: 40px; height: 40px; margin-right: 10px; border-radius: 50%;'><span style='background-color:#FEFAF6; padding:5px 8px; border-radius:3px; display:inline-block; max-width:60%; word-wrap:break-word;'>";
-            bert_response += "설명: " + data.bert_response.description + "<br>";
-            bert_response += "작가: " + data.bert_response.author + "<br>";
-            bert_response += "제목: " + data.bert_response.title + "<br>";
-            bert_response += "유사도 점수: " + data.bert_response.similarity_score + "<br>";
-            bert_response += "<img src='/static/Images/" + data.bert_response.image_file + "' style='width:300px;'></span></div>";
+                var gpt_response = "<div style='margin:20px; text-align:left; display:flex; align-items:center;'><img src='{% static 'assets/img/ai_img.jpeg' %}' alt='AI Image' style='width: 40px; height: 40px; margin-right: 10px; border-radius: 50%;'><span style='background-color:#FEFAF6; padding:5px 8px; border-radius:3px; display:inline-block; max-width:60%; word-wrap:break-word;'>" + data.answer + "</span></div>";
 
-            var gpt_response = "<div style='margin:20px; text-align:left; display:flex; align-items:center;'><img src='{% static 'assets/img/ai_img.jpeg' %}' alt='AI Image' style='width: 40px; height: 40px; margin-right: 10px; border-radius: 50%;'><span style='background-color:#FEFAF6; padding:5px 8px; border-radius:3px; display:inline-block; max-width:60%; word-wrap:break-word;'>" + data.gpt_response + "</span></div>";
+                if (data.image_paths && data.image_paths.length > 0) {
+                    data.image_paths.forEach(path => {
+                        gpt_response += "<img src='" + path + "' style='max-width:30%; margin-top: 10px;'>";
+                    });
+                }
 
-            document.getElementById("chatbox").innerHTML += bert_response;
-            document.getElementById("chatbox").innerHTML += gpt_response;
+                gpt_response += "</div>";
 
-            var mydiv = document.getElementById("chatbox");
-            mydiv.scrollTop = document.getElementById("chatbox").scrollHeight;
-            document.getElementById("chattext").value = "";
-        })
-        .catch(error => console.error('Error:', error));
-    }
+                document.getElementById("chatbox").innerHTML += gpt_response;
+
+                
+                
+                
+                var mydiv = document.getElementById("chatbox");
+                mydiv.scrollTop = document.getElementById("chatbox").scrollHeight;
+                document.getElementById("chattext").value = "";
+            })
+            .catch(error => console.error('Error:', error));
+        }
 
     function toggleFavorite(imageSrc, heartButton) {
         let favorites = JSON.parse(localStorage.getItem('favorites')) || [];
