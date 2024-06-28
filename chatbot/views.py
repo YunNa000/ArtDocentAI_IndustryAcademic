@@ -1,6 +1,8 @@
 from django.shortcuts import render
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
+import random
+from django.conf import settings
 
 import json
 import numpy as np
@@ -24,8 +26,16 @@ test_df_new = pd.read_excel('chatbot/static/assets/xlsx/tokenized_semart_test_co
 all_df = pd.concat([train_df_new, val_df_new, test_df_new], ignore_index=True)
 
 def home(request):
-    context = {}
-    return render(request, "home.html", context)
+    if settings.DEBUG:
+        image_directory = os.path.join(settings.STATICFILES_DIRS[0], 'Images')
+    else:
+        image_directory = os.path.join(settings.STATIC_ROOT, 'Images')
+
+    all_images = [f for f in os.listdir(image_directory) if os.path.isfile(os.path.join(image_directory, f))]
+    random_images = random.sample(all_images, 9) if len(all_images) >= 9 else all_images
+    image_urls = [os.path.join(settings.STATIC_URL, 'Images', img) for img in random_images]
+
+    return render(request, "home.html", {'image_urls': json.dumps(image_urls)})
 
 def favorite(request):
     context = {}
@@ -100,7 +110,7 @@ def calculate_string_score(string, substrings):
 # GPT-3 API 호출 함수
 def call_gpt_api(prompt):
     response = openai.ChatCompletion.create(
-        model="gpt-3.5-turbo",
+        model='gpt-4o-2024-05-13',
         messages=[
             {"role": "system", "content": "You are a helpful assistant."},
             {"role": "user", "content": prompt},
@@ -124,6 +134,7 @@ faiss1_index_path = './chatbot/db/faiss1'
 
 vectorstore = FAISS.load_local(faiss_index_path, embeddings_model, allow_dangerous_deserialization=True)
 vectorstore2 = FAISS.load_local(faiss1_index_path, embeddings_model, allow_dangerous_deserialization=True)
+
 def search_reviews(query):
     # 검색어를 기반으로 벡터 저장소에서 유사한 리뷰 검색
     search_result = vectorstore.similarity_search(query, k=10)
@@ -143,7 +154,7 @@ def get_json_text(query_text):
     prompt = f'Generate a JSON object that includes the title, author, technique, shape, type, school, and timeframe of the artwork described in the following query: "{query_text}"'
     
     response = openai.ChatCompletion.create(
-        model='gpt-3.5-turbo',
+        model='gpt-4o-2024-05-13',
         messages=[
             {
                 "role": "user",
@@ -154,20 +165,28 @@ def get_json_text(query_text):
     
     answer_text = response['choices'][0]['message']['content'].strip()
     print("Generated JSON Text: ", answer_text)
-    return answer_text
+
+    # Remove backticks and any extra text around the JSON object
+    start_idx = answer_text.find('{')
+    end_idx = answer_text.rfind('}') + 1
+    json_text = answer_text[start_idx:end_idx]
+    
+    try:
+        answer_json = json.loads(json_text)
+    except json.JSONDecodeError as e:
+        print("JSONDecodeError: ", str(e))
+        return None
+    
+    return answer_json
     
 
 def get_answer(query_text):
     scoring = all_df.copy()
-    answer = get_json_text(query_text)
-    if answer is None:
+    answer_json = get_json_text(query_text)
+    if answer_json is None:
         return pd.DataFrame(), "Empty or invalid response from OpenAI API"
     
-    try:
-        art_data = json_to_artdata(answer)
-    except json.JSONDecodeError as e:
-        print("JSONDecodeError: ", str(e))
-        return pd.DataFrame(), "Failed to parse JSON data"
+    art_data = json_to_artdata(json.dumps(answer_json))  # JSON 객체를 문자열로 변환하여 전달
 
     if art_data is None:
         return pd.DataFrame(), "Failed to parse JSON data"
@@ -241,7 +260,7 @@ def get_answer(query_text):
 
     prompt = "질문:" + query_text + total
     chat_completion = openai.ChatCompletion.create(
-        model="gpt-3.5-turbo",
+        model='gpt-4o-2024-05-13',
         messages=[
             {
                 "role": "user",
@@ -276,8 +295,9 @@ def chatanswer(request):
         context['answer'] = answer  # GPT-3 응답
 
         # 이미지 경로 추가
+        # image_paths = [f"static/Images/{result_df['IMAGE_FILE'].iloc[0]}"]
         if not result_df.empty and 'IMAGE_FILE' in result_df.columns:
-            image_paths = [f"static/Images/{result_df['IMAGE_FILE'].iloc[0]}"]
+            image_paths = [f"static/Images/{row['IMAGE_FILE']}" for _, row in result_df.iterrows()]
         else:
             image_paths = []
 

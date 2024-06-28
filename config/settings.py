@@ -125,6 +125,11 @@ STATICFILES_DIRS = [
     os.path.join(BASE_DIR, 'chatbot/static'),  # Correct path format
 ]
 
+# 운영 환경에서 모든 정적 파일을 모아두는 디렉토리
+STATIC_ROOT = os.path.join(BASE_DIR, 'chatbot/static/Images')
+
+# 이미지 디렉토리 상수 정의
+IMAGE_DIRECTORY = 'Images'
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
