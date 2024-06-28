@@ -91,8 +91,12 @@ Home - ChatBot Service
                 var gpt_response = "<div style='margin:20px; text-align:left; display:flex; align-items:center;'><img src='{% static 'assets/img/ai_img.jpeg' %}' alt='AI Image' style='width: 40px; height: 40px; margin-right: 10px; border-radius: 50%;'><span style='background-color:#FEFAF6; padding:5px 8px; border-radius:3px; display:inline-block; max-width:60%; word-wrap:break-word;'>" + data.answer + "</span></div>";
 
                 if (data.image_paths && data.image_paths.length > 0) {
-                    data.image_paths.forEach(path => {
-                        gpt_response += "<img src='" + path + "' style='max-width:30%; margin-top: 10px;'>";
+                    data.image_paths.forEach((path, index) => {
+                        if(index === 0){
+                            gpt_response += "<img src='" + path + "' style='max-width:30%; margin-top: 10px;'>";
+                        } else {
+                            gallery_images.push(path);
+                        }
                     });
                 }
 
@@ -103,6 +107,8 @@ Home - ChatBot Service
                 var mydiv = document.getElementById("chatbox");
                 mydiv.scrollTop = document.getElementById("chatbox").scrollHeight;
                 document.getElementById("chattext").value = "";
+
+                loadNextImages();
             })
             .catch(error => console.error('Error:', error));
     }
@@ -132,41 +138,15 @@ Home - ChatBot Service
         loadNextImages();
     }
 
-    var imagesList = [
-        [
-            '{% static "assets/imgdata/9886332401.png" %}',
-            '{% static "assets/imgdata/6314097491358110_1949232164.png" %}',
-            '{% static "assets/imgdata/21150542432613180_427128005.png" %}',
-            '{% static "assets/imgdata/33464962553633817_1968830977.png" %}',
-            '{% static "assets/imgdata/33571678858755115_1495166511.png" %}',
-            '{% static "assets/imgdata/33572095033992831_1203825347.png" %}',
-            '{% static "assets/imgdata/33572697087420928_2113376738.png" %}',
-            '{% static "assets/imgdata/34705573740579894_376972065.png" %}',
-            '{% static "assets/imgdata/34356097404599052_1810286742.png" %}',
-        ],
-        [
-            '{% static "assets/img/news-1.jpg" %}',
-            '{% static "assets/img/news-2.jpg" %}',
-            '{% static "assets/img/news-3.jpg" %}',
-            '{% static "assets/img/news-4.jpg" %}',
-            '{% static "assets/img/news-5.jpg" %}',
-            '{% static "assets/img/news-1.jpg" %}',
-            '{% static "assets/img/news-2.jpg" %}',
-            '{% static "assets/img/news-3.jpg" %}',
-            '{% static "assets/img/news-4.jpg" %}',
-        ]
-    ];
-    var currentImageSetIndex = 0;
+    var gallery_images = JSON.parse('{{ image_urls|escapejs }}');  // 서버에서 전달된 이미지 URL 리스트
 
     function loadNextImages() {
         var gallery = document.getElementById("gallery");
         gallery.innerHTML = "";
 
-        if (currentImageSetIndex >= imagesList.length) {
-            currentImageSetIndex = 0;
-        }
+        var images = gallery_images.slice(0, 9);
+        gallery_images = gallery_images.slice(9);
 
-        var images = imagesList[currentImageSetIndex];
         let favorites = JSON.parse(localStorage.getItem('favorites')) || [];
         images.forEach(function (imageSrc, index) {
             var imgContainer = document.createElement("div");
@@ -190,7 +170,6 @@ Home - ChatBot Service
             imgContainer.appendChild(heartButton);
             gallery.appendChild(imgContainer);
         });
-        currentImageSetIndex++;
     }
 
     window.onload = function () {
