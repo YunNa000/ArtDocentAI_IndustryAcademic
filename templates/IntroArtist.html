@@ -104,104 +104,39 @@
         height: auto;
         margin: 10px;
     }
-
-    .pagination {
-        text-align: center;
-        margin-top: 20px;
-    }
-
-    .pagination button {
-        padding: 10px 20px;
-        margin: 5px;
-        border: none;
-        background-color: #007bff;
-        color: white;
-        border-radius: 5px;
-        cursor: pointer;
-        transition: background-color 0.3s ease;
-    }
-
-    .pagination button:hover {
-        background-color: #0056b3;
-    }
-
-    .pagination button:disabled {
-        background-color: #ccc;
-        cursor: not-allowed;
-    }
 </style>
 
-<div class="gallery-container"></div>
-
-<div class="pagination">
-    <button id="prev-page" disabled>Previous</button>
-    <button id="next-page">Next</button>
+<div class="gallery-container">
+    {% for artist in artists %}
+    <div class="grid-item">
+        <a href="#modal{{ forloop.counter }}" class="open-modal">
+            <img src="{% static artist.image %}" alt="{{ artist.name }}">
+            <p>{{ artist.name }}</p>
+        </a>
+        <div id="modal{{ forloop.counter }}" class="modal">
+            <div class="modal-content">
+                <a href="#" class="close-btn">&times;</a>
+                <img src="{% static artist.image %}" alt="{{ artist.name }}">
+                <h2>{{ artist.name }}</h2>
+                <p>{{ artist.description }}</p>
+                <a href="#artworks{{ forloop.counter }}" class="view-artworks-btn">작가 작품 보러가기</a>
+            </div>
+        </div>
+        <div id="artworks{{ forloop.counter }}" class="artworks-list modal">
+            <div class="modal-content">
+                <a href="#" class="close-btn">&times;</a>
+                <div class="row">
+                    <img src="{% static 'assets/imgdata/9886332401.png' %}" alt="Artwork 1" class="artwork-image">
+                    <img src="{% static 'assets/imgdata/9886332401.png' %}" alt="Artwork 2" class="artwork-image">
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
 </div>
 
 <script>
     document.addEventListener('DOMContentLoaded', function () {
-        const artists = {{ artists|safe }};
-        const itemsPerPage = 25;
-        let currentPage = 1;
-
-        function renderPage(page) {
-            const galleryContainer = document.querySelector('.gallery-container');
-            galleryContainer.innerHTML = '';
-
-            const startIndex = (page - 1) * itemsPerPage;
-            const endIndex = Math.min(startIndex + itemsPerPage, artists.length);
-
-            for (let i = startIndex; i < endIndex; i++) {
-                const artist = artists[i];
-                const gridItem = document.createElement('div');
-                gridItem.className = 'grid-item';
-                gridItem.innerHTML = `
-                    <a href="#modal${i + 1}" class="open-modal">
-                        <img src="{% static 'assets/img/${artist.image}' %}" alt="${artist.name}">
-                        <p>${artist.name}</p>
-                    </a>
-                    <div id="modal${i + 1}" class="modal">
-                        <div class="modal-content">
-                            <a href="#" class="close-btn">&times;</a>
-                            <img src="{% static 'assets/img/${artist.image}' %}" alt="${artist.name}">
-                            <h2>${artist.name}</h2>
-                            <p>${artist.description}</p>
-                            <a href="#artworks${i + 1}" class="view-artworks-btn">작가 작품 보러가기</a>
-                        </div>
-                    </div>
-                    <div id="artworks${i + 1}" class="artworks-list modal">
-                        <div class="modal-content">
-                            <a href="#" class="close-btn">&times;</a>
-                            <div class="row">
-                                <img src="{% static 'assets/imgdata/9886332401.png' %}" alt="Artwork 1" class="artwork-image">
-                                <img src="{% static 'assets/imgdata/9886332401.png' %}" alt="Artwork 2" class="artwork-image">
-                            </div>
-                        </div>
-                    </div>
-                `;
-                galleryContainer.appendChild(gridItem);
-            }
-
-            document.getElementById('prev-page').disabled = page === 1;
-            document.getElementById('next-page').disabled = endIndex >= artists.length;
-        }
-
-        document.getElementById('prev-page').addEventListener('click', function () {
-            if (currentPage > 1) {
-                currentPage--;
-                renderPage(currentPage);
-            }
-        });
-
-        document.getElementById('next-page').addEventListener('click', function () {
-            if ((currentPage - 1) * itemsPerPage + itemsPerPage < artists.length) {
-                currentPage++;
-                renderPage(currentPage);
-            }
-        });
-
-        renderPage(currentPage);
-
         var modals = document.querySelectorAll('.modal');
         var closeButtons = document.querySelectorAll('.close-btn');
         var artworkButtons = document.querySelectorAll('.view-artworks-btn');
