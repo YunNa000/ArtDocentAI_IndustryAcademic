@@ -17,7 +17,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 # OpenAI API 키 설정
-openai.api_key = os.getenv("OPENAI_API_KEY")
+openai.api_key = "sk-proj-8Jje3SgQi9NS02pKp4lfT3BlbkFJkrUa1Naus9phlHGC2Ack"#os.getenv("OPENAI_API_KEY")
 
 # 데이터 로드 및 모델 초기화
 train_df_new = pd.read_excel('chatbot/static/assets/xlsx/tokenized_semart_train_combined.xlsx')
@@ -102,16 +102,15 @@ def json_to_artdata(json_str):
         data = json.loads(json_str)
         
         art = ArtData()
-        art.title = data.get('title')
-        art.description = data.get('description')
+        art.title = data.get('description')
+        #art.description = data.get('description')
         art.technique = data.get('technique')
         art.author = data.get('author')
         art.shape = data.get('shape')
         art.type = data.get('type')
-        art.school = data.get('school')
-        art.timeframe = data.get('timeframe')
+        art.school = data.get('nationality')
+        art.timeframe = data.get('art form')
         art.depiction = data.get('depiction')
-        
         return art
     except json.JSONDecodeError as e:
         print("JSON 解析错误:", e)
@@ -125,12 +124,18 @@ def calculate_director_score(directors,directors_to_check):
             score += 1
     return score
 
-def calculate_string_score(string, substrings):
+def calculate_string_score1(string, substrings):
+    score = 0
     for substring in substrings:
-        if substring in string:
+        if substring.lower() in string.lower():
+            score += 0.5
+    return score
+
+def calculate_string_score(string_list, substring):
+    for string in string_list:
+        if substring.lower() in string.lower():
             return 1
     return 0
-
 
 # GPT-3 API 호출 함수
 def call_gpt_api(prompt):
@@ -162,7 +167,7 @@ vectorstore2 = FAISS.load_local(faiss1_index_path, embeddings_model, allow_dange
 
 def search_reviews(query):
     # 검색어를 기반으로 벡터 저장소에서 유사한 리뷰 검색
-    search_result = vectorstore.similarity_search(query, k=10)
+    search_result = vectorstore.similarity_search(query, k=5)
     
     # 검색 결과 출력
     results = []
@@ -176,7 +181,22 @@ def search_reviews(query):
     return results
 
 def get_json_text(query_text):
-    prompt = f'Generate a JSON object that includes the title, author, technique, shape, type, school, and timeframe of the artwork described in the following query: "{query_text}"'
+    prompt="""
+다음 질문을 기반으로 정보를 키워드 분류해 주세요. 한국어 키워드는 꼭 영어로 적절하게 번역해서 넣어 주세요
+예시 질문:""예수와 동방박사가 나오는 르네상스 시대 프랑스산 가로형 유화 그림 추천해줘. 기법은 점묘화로 이 모든 값들은 알수 없는 것은 null이고 shape는 Vertical,Horizontal만 있어 유일하게 description만 "Jesus Magi Birth"처럼 이 질문을 묘사할 가장 적절한 키워드들을 띄어쓰기로 분류해 검색할 수 있어
+결과를 다음 형식으로 제공해 주세요 절대 주석을 넣거나 영어 번역을 어기면 안됨 코드에 넣을거라:
+예시 답변:
+{
+    "description": "Jesus Magi",
+    "author": null,
+    "technique": "Oil",
+    "shape": "Horizonta",'
+    "type": "Still life",
+    "nationality": "French",
+    "art form": "Renaissance"
+}
+질문:
+"""+query_text
     
     response = openai.ChatCompletion.create(
         model='gpt-4o-2024-05-13',
@@ -205,7 +225,31 @@ def get_json_text(query_text):
     return answer_json
     
 
+
 def get_answer(query_text):
+
+    # if '추천' not in query_text:
+    #     chat_completion = openai.ChatCompletion.create(
+    #     model='gpt-4o-2024-05-13',
+    #     messages=[
+    #         {
+    #             "role": "user",
+    #             "content": query_text,
+    #         }
+    #     ],
+    #     stream=True
+    #     )
+    #     answer_text = ""
+    #     for chunk in chat_completion:
+    #         if hasattr(chunk.choices[0], 'delta') and hasattr(chunk.choices[0].delta, 'content'):
+    #             content = chunk.choices[0].delta.get("content", "")
+    #             if content:
+    #                 answer_text += content
+
+    #     # 추천 데이터 특징 확인용 지워도됨
+    #     #result_df.to_csv(r'C:\Users\Admin\Desktop\result_datatitle.csv', index=False)
+    #     return None, answer_text
+
     scoring = all_df.copy()
     answer_json = get_json_text(query_text)
     if answer_json is None:
@@ -220,50 +264,56 @@ def get_answer(query_text):
     alpha = 1.2
 
     if art_data.title is not None:
-        scoring['scoreTITLE'] = scoring['TITLE'].apply(lambda x: calculate_string_score(x, art_data.title))
+        titles=art_data.title.split()
+        scoring['scoreTITLE'] = scoring['TITLE'].apply(lambda x: calculate_string_score1(x, titles))
         scoring['total_score'] += scoring['scoreTITLE'] * alpha
 
     if art_data.author is not None:
-        scoring['scoreAUTHOR'] = scoring['AUTHOR'].apply(lambda x: calculate_string_score(x, art_data.author))
+        scoring['scoreAUTHOR'] = scoring['AUTHOR'].apply(lambda x: calculate_string_score([x], art_data.author))
         scoring['total_score'] += scoring['scoreAUTHOR'] * alpha
 
     if art_data.technique is not None:
-        scoring['scoreTECHNIQUE'] = scoring['TECHNIQUE'].apply(lambda x: calculate_string_score(x, art_data.technique))
+        scoring['scoreTECHNIQUE'] = scoring['TECHNIQUE'].apply(lambda x: calculate_string_score([x], art_data.technique))
         scoring['total_score'] += scoring['scoreTECHNIQUE'] * alpha
-
+ 
     if art_data.shape is not None:
-        scoring['scoreSHAPE'] = scoring['SHAPE'].apply(lambda x: calculate_string_score(x, art_data.shape))
+        scoring['scoreSHAPE'] = scoring['SHAPE'].apply(lambda x: calculate_string_score([x], art_data.shape))
         scoring['total_score'] += scoring['scoreSHAPE'] * alpha
 
     if art_data.type is not None:
-        scoring['scoreTYPE'] = scoring['TYPE'].apply(lambda x: calculate_string_score(x, art_data.type))
+        scoring['scoreTYPE'] = scoring['TYPE'].apply(lambda x: calculate_string_score([x], art_data.type))
         scoring['total_score'] += scoring['scoreTYPE'] * alpha
-
     if art_data.school is not None:
-        scoring['scoreSCHOOL'] = scoring['SCHOOL'].apply(lambda x: calculate_string_score(x, art_data.school))
+        scoring['scoreSCHOOL'] = scoring['SCHOOL'].apply(lambda x: calculate_string_score([x], art_data.school))
         scoring['total_score'] += scoring['scoreSCHOOL'] * alpha
 
-    review_data = {}
-    search_result = vectorstore.similarity_search(query_text)
-    for i, review in enumerate(search_result):
-        review_data[review.metadata['title']] = {
-            'author': review.metadata['author'],
-            'content': review.page_content
-        }
-        index = scoring[scoring['TITLE'] == review.metadata['title']].index
-        if not index.empty:
-            scoring.loc[index, 'total_score'] += 2
-
-    review_data2 = {}
-    search_result = vectorstore2.similarity_search(query_text)
-    for i, review in enumerate(search_result):
-        review_data2[review.metadata['title']] = {
-            'author': review.metadata['author'],
-            'content': review.page_content
-        }
-        index = scoring[scoring['TITLE'] == review.metadata['title']].index
-        if not index.empty:
-            scoring.loc[index, 'total_score'] = scoring.loc[index, 'total_score'] + 2
+    # if art_data.timeframe is not None:
+    #     scoring['scoreTIMEFRAME'] = scoring['TIMEFRAME'].apply(lambda x: calculate_string_score(x, art_data.timeframe))
+    #     scoring['total_score'] += scoring['scoreTIMEFRAME'] * alpha
+    scoring.to_csv(r'C:\Users\Admin\Desktop\result_datatitle_scoreing.csv', index=False)  
+    
+    if art_data.title is not None:
+        review_data = {}
+        search_result = vectorstore.similarity_search(art_data.title)
+        for i, review in enumerate(search_result):
+            review_data[review.metadata['title']] = {
+                'author': review.metadata['author'],
+                'content': review.page_content
+            }
+            index = scoring[scoring['TITLE'] == review.metadata['title']].index
+            if not index.empty:
+                scoring.loc[index, 'total_score'] += 1.1
+        print(art_data.title[0])
+        review_data2 = {}
+        search_result = vectorstore2.similarity_search(art_data.title)
+        for i, review in enumerate(search_result):
+            review_data2[review.metadata['title']] = {
+                'author': review.metadata['author'],
+                'content': review.page_content
+            }
+            index = scoring[scoring['TITLE'] == review.metadata['title']].index
+            if not index.empty:
+                scoring.loc[index, 'total_score'] = scoring.loc[index, 'total_score'] + 1.21
 
     result_df = scoring.sort_values('total_score', ascending=False).head(20)
     most_similar_index = result_df['total_score'].idxmax()
@@ -300,6 +350,9 @@ def get_answer(query_text):
             content = chunk.choices[0].delta.get("content", "")
             if content:
                 answer_text += content
+
+    # 추천 데이터 특징 확인용 지워도됨
+    #result_df.to_csv(r'C:\Users\Admin\Desktop\result_datatitle.csv', index=False)
     return result_df, answer_text
 
 @csrf_exempt
