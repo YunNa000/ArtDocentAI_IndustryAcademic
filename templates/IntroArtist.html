@@ -7,11 +7,16 @@
 
 {% block content %}
 <style>
+    body {
+        background-color: rgb(82, 65, 65);
+    }
     .gallery-container {
         display: flex;
         flex-wrap: wrap;
         gap: 20px;
         justify-content: center;
+        background-color: rgb(82, 65, 65);
+
     }
 
     .grid-item {
@@ -28,7 +33,10 @@
     .grid-item img:hover {
         transform: scale(1.1);
     }
-
+    a {
+        text-decoration: none;
+        color: rgb(179, 173, 173);
+    }
     .modal {
         display: none;
         position: fixed;
