@@ -17,7 +17,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 # OpenAI API 키 설정
-openai.api_key = os.getenv("OPENAI_API_KEY")
+openai.api_key = "sk-proj-8Jje3SgQi9NS02pKp4lfT3BlbkFJkrUa1Naus9phlHGC2Ack" #os.getenv("OPENAI_API_KEY")
 
 # 데이터 로드 및 모델 초기화
 train_df_new = pd.read_excel('chatbot/static/assets/xlsx/tokenized_semart_train_combined.xlsx')
@@ -46,32 +46,21 @@ def IntroTeam(request):
     return render(request, "IntroTeam.html", context)
 
 def IntroArtist(request):
-    artists = [
-        {'name': 'AACHEN, Hans von', 'image': 'artist_images/aachen.jpg', 
-         'description': 'AACHEN, Hans von (1552–1615) - 독일 출신의 화가로, 주로 종교적 주제와 야경을 다루었습니다. 그의 작품은 마네리즘과 베네치아 르네상스의 영향을 받았으며, 세밀한 묘사와 생동감 넘치는 색채, 그리고 극적인 구도로 유명합니다. 특히 그의 그림은 인물들의 신비로움과 감정적 풍부함을 잘 담아내었습니다.' },
-        {'name': 'AAGAARD, Carl Frederik', 'image': 'artist_images/aagaard.jpg',
-         'description': 'AAGAARD, Carl Frederik (1833–1895) - 덴마크 풍경 화가로, 자연의 아름다움을 세밀하게 담아내어 유명합니다. 바르비존 학파와 현실주의 운동의 영향을 받으며, 그의 작품은 자연의 공기와 빛의 변화를 섬세하게 표현합니다. 덴마크의 시골 풍경을 주로 소재로 삼아서, 그의 화풍은 자연의 조용한 아름다움을 감각적으로 전달합니다.'},
-        {'name': 'ABADIA, Juan de la', 'image': 'artist_images/abadia.jpg',
-         'description': 'ABADIA, Juan de la (15세기 후반-16세기 초반 활동) - 스페인 출신의 고딕 화가로, 종교적 구도와 알타르피스를 주로 다루었습니다. 그의 작품은 세밀하고 다채로운 색채, 복잡한 세부 사항과 함께, 고딕 예술의 전통을 잘 이어받았습니다. 특히 그의 그림은 신성함과 동시에 인간의 존엄성을 강조하는데 주력했습니다.'},
-        {'name': 'ABBATE, Niccolò dell', 'image': 'artist_images/abbate.jpg',
-         'description': 'ABBATE, Niccolò dell (약 1509–1571) - 이탈리아 출신의 마네리즘 화가로, 신화적이고 애굽적인 테마를 주로 다루었습니다. 델 아바테의 작품은 우아하고 정교한 스타일로 유명하며, 움직임과 감정을 특징으로 합니다. 그의 그림은 신화와 역사의 경계를 넘나들며, 당시의 문화적인 다양성을 반영합니다.'},
-        {'name': 'ABBATI, Giuseppe', 'image': 'artist_images/abbati.jpg',
-         'description': 'ABBATI, Giuseppe (1836–1868) - 이탈리아 풍경 화가로, 막키아올리 그룹에 속했으며, 자연의 아름다움을 생동감 있게 표현했습니다. 그의 풍경화는 대담한 색채와 감각적인 브러시워크로 자연의 빛과 효과를 포착하며, 당대 이탈리아 자연주의 회화의 중요한 사례로 평가받고 있습니다.'},
-        {'name': 'ABBATINI, Guido Ubaldo', 'image': 'artist_images/abbatini.jpg',
-         'description': 'ABBATINI, Guido Ubaldo (1602–1656) - 이탈리아 출신의 바로크 화가로, 종교적이고 역사적인 주제를 주로 다뤘습니다. 그의 작품은 강렬한 조명과 그림자의 사용으로 유명하며, 감정과 정신적 깊이를 표현했습니다. 특히 그의 화풍은 바로크 예술의 특성을 잘 대변하며, 신앙과 예술적 표현의 조화를 추구했습니다.'},
-        {'name': 'ABILDGAARD, Nicolai', 'image': 'artist_images/abildgaard.jpg',
-         'description': 'ABILDGAARD, Nicolai (1743–1809) - 덴마크 출신의 네오클래식 화가로, 역사적이고 신화적인 구도를 그립니다. 그의 작품은 형태의 명확성과 고전적 아름다움을 강조했습니다. 또한 자연과 인간의 상호작용을 중시하며, 그의 화풍은 현실과 이상 사이의 상호작용을 탐구했습니다.'},
-        {'name': 'ACHENBACH, Oswald', 'image': 'artist_images/achenbach.jpg',
-         'description': 'ACHENBACH, Oswald (1827–1905) - 독일 출신의 풍경 화가로, 뒤셀도르프 학파에 속했으며, 바다와 해변의 아름다움을 특히 잘 표현했습니다. 그의 작품은 빛과 물의 상호작용을 섬세하게 그려내어, 자연의 순수한 아름다움을 감각적으로 전달했습니다. 특히 그의 바다 풍경은 깊은 감성과 자연의 근원적인 아름다움을 잘 담아내었습니다.'},
-        {'name': 'ADAM, Albrecht', 'image': 'artist_images/adam.jpg',
-         'description': 'ADAM, Albrecht (1786–1862) - 독일 출신의 화가 및 리소그라퍼로, 낭만주의와 사실주의를 결합한 풍경과 역사적 주제를 다뤘습니다. 그의 작품은 문학적 감성과 풍경의 몽환적 표현으로 유명합니다. 특히 그의 풍경화는 자연의 장엄함과 인간의 존재감을 아우르며, 그의 예술적 비전을 잘 대변했습니다.'},
-        {'name': 'ADEMOLLO, Luigi', 'image': 'artist_images/ademollo.jpg',
-         'description': 'ADEMOLLO, Luigi (1764–1849) - 이탈리아 출신의 네오클래식과 낭만주의 화가로, 역사적이고 신화적인 주제를 다뤘습니다. 그의 작품은 구성의 섬세함과 조화로운 색감이 돋보입니다. 특히 그의 풍경화는 자연과 인간의 조화를 중시하며, 당대의 이탈리아 미학의 상징적인 예술가로 평가받고 있습니다.'},
-        {'name': 'ADLER, Salomon', 'image': 'artist_images/adler.jpg',
-         'description': 'ADLER, Salomon (1630–1709) - 독일 바로크 화가로, 종교적이고 일상적인 주제를 현실적으로 그렸습니다. 그의 작품은 세밀한 묘사와 감정 표현이 특징입니다. 특히 그의 그림은 바로크 예술의 특성을 잘 대변하며, 그 시대의 문화적 풍경을 잘 보여줍니다.'},
-        {'name': 'ADRIAENSSEN, Alexander', 'image': 'artist_images/adriaenssen.jpg',
-         'description': 'ADRIAENSSEN, Alexander (1587–1661) - 플랑드르 출신의 바로크 화가로, 여전사(바니타스)를 주제로 한 작품으로 유명합니다. 그의 작품은 물건의 세밀한 묘사와 빛과 그림자의 상징적 사용으로 알려져 있습니다. 특히 그의 그림은 인간 존재의 무상한 플레이에 대한 깊은 사색을 제안합니다.'}
-    ]
+    df = pd.read_csv(r'chatbot/static/assets/xlsx/grouped_artist_table.csv', encoding='cp949')
+    
+    # 데이터 파싱 및 리스트 구성
+    artists = []
+    for _, row in df.iterrows():
+        # 각 row에 대한 artist dictionary를 생성
+        artist = {
+            'name': row['AUTHOR'],  # 작가의 이름을 'AUTHOR' 열에서 가져옴
+            'description': row['DESCRIPTION'],  # 작가의 설명을 'DESCRIPTION' 열에서 가져옴
+            'artworks': [artwork.strip() for artwork in str(row['ARTWORK']).split(',')] if pd.notna(row['ARTWORK']) else []
+        }
+        # artist dictionary를 artists 리스트에 추가
+        artists.append(artist)
+    
+    # artists 리스트를 컨텍스트로 IntroArtist.html 템플릿 렌더링
     return render(request, "IntroArtist.html", {'artists': artists})
 
 from IPython.display import Image, display
@@ -133,7 +122,7 @@ def calculate_string_score1(string, substrings):
 
 def calculate_string_score(string_list, substring):
     for string in string_list:
-        if substring.lower() in string.lower():
+        if substring in string:
             return 1
     return 0
 
@@ -225,31 +214,7 @@ def get_json_text(query_text):
     return answer_json
     
 
-
 def get_answer(query_text):
-
-    # if '추천' not in query_text:
-    #     chat_completion = openai.ChatCompletion.create(
-    #     model='gpt-4o-2024-05-13',
-    #     messages=[
-    #         {
-    #             "role": "user",
-    #             "content": query_text,
-    #         }
-    #     ],
-    #     stream=True
-    #     )
-    #     answer_text = ""
-    #     for chunk in chat_completion:
-    #         if hasattr(chunk.choices[0], 'delta') and hasattr(chunk.choices[0].delta, 'content'):
-    #             content = chunk.choices[0].delta.get("content", "")
-    #             if content:
-    #                 answer_text += content
-
-    #     # 추천 데이터 특징 확인용 지워도됨
-    #     #result_df.to_csv(r'C:\Users\Admin\Desktop\result_datatitle.csv', index=False)
-    #     return None, answer_text
-
     scoring = all_df.copy()
     answer_json = get_json_text(query_text)
     if answer_json is None:
@@ -350,9 +315,9 @@ def get_answer(query_text):
             content = chunk.choices[0].delta.get("content", "")
             if content:
                 answer_text += content
-
-    # 추천 데이터 특징 확인용 지워도됨
-    #result_df.to_csv(r'C:\Users\Admin\Desktop\result_datatitle.csv', index=False)
+    result_df['시발']=art_data.title
+    # Raw 문자열을 사용하는 방법
+    result_df.to_csv(r'C:\Users\Admin\Desktop\result_datatitle.csv', index=False)
     return result_df, answer_text
 
 @csrf_exempt
