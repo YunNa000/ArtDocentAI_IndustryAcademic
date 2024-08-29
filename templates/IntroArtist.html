@@ -118,13 +118,13 @@
     {% for artist in artists %}
     <div class="grid-item">
         <a href="#modal{{ forloop.counter }}" class="open-modal">
-            <img src="{% static artist.image %}" alt="{{ artist.name }}">
+            <img src="{% static 'artist_images/' %}{{ artist.image }}" alt="{{ artist.name }}">
             <p>{{ artist.name }}</p>
         </a>
         <div id="modal{{ forloop.counter }}" class="modal">
             <div class="modal-content">
                 <a href="#" class="close-btn">&times;</a>
-                <img src="{% static artist.image %}" alt="{{ artist.name }}">
+                <img src="{% static 'artist_images/' %}{{ artist.image }}" alt="{{ artist.name }}">
                 <h2>{{ artist.name }}</h2>
                 <p>{{ artist.description }}</p>
                 <a href="#artworks{{ forloop.counter }}" class="view-artworks-btn">작가 작품 보러가기</a>
@@ -134,8 +134,9 @@
             <div class="modal-content">
                 <a href="#" class="close-btn">&times;</a>
                 <div class="row">
-                    <img src="{% static 'assets/imgdata/9886332401.png' %}" alt="Artwork 1" class="artwork-image">
-                    <img src="{% static 'assets/imgdata/9886332401.png' %}" alt="Artwork 2" class="artwork-image">
+                    {% for artwork in artist.artworks %}
+                    <img src="{% static 'Images/' %}{{ artwork }}" alt="Artwork" class="artwork-image">
+                    {% endfor %}
                 </div>
             </div>
         </div>
