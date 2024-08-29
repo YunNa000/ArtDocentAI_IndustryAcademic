@@ -17,7 +17,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 # OpenAI API 키 설정
-openai.api_key = "sk-proj-8Jje3SgQi9NS02pKp4lfT3BlbkFJkrUa1Naus9phlHGC2Ack"#os.getenv("OPENAI_API_KEY")
+openai.api_key = os.getenv("OPENAI_API_KEY")
 
 # 데이터 로드 및 모델 초기화
 train_df_new = pd.read_excel('chatbot/static/assets/xlsx/tokenized_semart_train_combined.xlsx')
