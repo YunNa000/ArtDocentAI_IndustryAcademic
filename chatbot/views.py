@@ -20,20 +20,20 @@ load_dotenv()
 openai.api_key = "sk-proj-8Jje3SgQi9NS02pKp4lfT3BlbkFJkrUa1Naus9phlHGC2Ack" #os.getenv("OPENAI_API_KEY")
 
 # 데이터 로드 및 모델 초기화
-train_df_new = pd.read_excel('chatbot/static/assets/xlsx/tokenized_semart_train_combined.xlsx')
-val_df_new = pd.read_excel('chatbot/static/assets/xlsx/tokenized_semart_val_combined.xlsx')
-test_df_new = pd.read_excel('chatbot/static/assets/xlsx/tokenized_semart_test_combined.xlsx')
+train_df_new = pd.read_excel('chatbot/static/xlsx/tokenized_semart_train_combined.xlsx')
+val_df_new = pd.read_excel('chatbot/static/xlsx/tokenized_semart_val_combined.xlsx')
+test_df_new = pd.read_excel('chatbot/static/xlsx/tokenized_semart_test_combined.xlsx')
 all_df = pd.concat([train_df_new, val_df_new, test_df_new], ignore_index=True)
 
 def home(request):
     if settings.DEBUG:
-        image_directory = os.path.join(settings.STATICFILES_DIRS[0], 'Images')
+        image_directory = os.path.join(settings.STATICFILES_DIRS[0], 'art-images')
     else:
-        image_directory = os.path.join(settings.STATIC_ROOT, 'Images')
+        image_directory = os.path.join(settings.STATIC_ROOT, 'art-images')
 
     all_images = [f for f in os.listdir(image_directory) if os.path.isfile(os.path.join(image_directory, f))]
     random_images = random.sample(all_images, 9) if len(all_images) >= 9 else all_images
-    image_urls = [os.path.join(settings.STATIC_URL, 'Images', img) for img in random_images]
+    image_urls = [os.path.join(settings.STATIC_URL, 'art-images', img) for img in random_images]
 
     return render(request, "home.html", {'image_urls': json.dumps(image_urls)})
 
@@ -46,7 +46,7 @@ def IntroTeam(request):
     return render(request, "IntroTeam.html", context)
 
 def IntroArtist(request):
-    df = pd.read_csv(r'chatbot/static/assets/xlsx/grouped_artist_table.csv', encoding='cp949')
+    df = pd.read_csv(r'chatbot\static/xlsx/grouped_artist_table_sample.csv', encoding='cp949')
     
     # 데이터 파싱 및 리스트 구성
     artists = []
@@ -67,7 +67,7 @@ from IPython.display import Image, display
 
 # Function to display the image from the IMAGE_FILE path
 def display_artwork_image_proportionally(most_similar_artwork, width=None):
-    image_path = f"Images/{most_similar_artwork['IMAGE_FILE']}"
+    image_path = f"art-images/{most_similar_artwork['IMAGE_FILE']}"
     display(Image(filename=image_path, width=width))
 
 import json
@@ -340,7 +340,7 @@ def chatanswer(request):
         # 이미지 경로 추가
         # image_paths = [f"static/Images/{result_df['IMAGE_FILE'].iloc[0]}"]
         if not result_df.empty and 'IMAGE_FILE' in result_df.columns:
-            image_paths = [f"static/Images/{row['IMAGE_FILE']}" for _, row in result_df.iterrows()]
+            image_paths = [f"static/art-images/{row['IMAGE_FILE']}" for _, row in result_df.iterrows()]
         else:
             image_paths = []
 

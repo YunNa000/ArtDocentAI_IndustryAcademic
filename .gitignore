@@ -1,6 +1,3 @@
 .env
 .pyc
-*.jpg
-*.png
-*.gif
-*.jpeg
+chatbot/static/art-images/

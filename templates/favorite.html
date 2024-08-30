@@ -21,7 +21,7 @@ Favorite - ChatBot Service
 
         let favorites = JSON.parse(localStorage.getItem('favorites')) || [];
         if (favorites.length === 0) {
-            gallery.innerHTML = "<p>No favorites yet.</p>";
+            gallery.innerHTML = "<p>아직 좋아하는 작품이 없습니다.</p>";
         } else {
             favorites.forEach(function(imageSrc) {
                 var imgContainer = document.createElement("div");
