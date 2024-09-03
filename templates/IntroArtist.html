@@ -28,6 +28,8 @@
         width: 100%;
         height: auto;
         transition: transform 0.3s ease;
+        background-color: white;
+        object-fit: contain;
     }
 
     .grid-item img:hover {
@@ -58,16 +60,18 @@
         margin: auto;
         padding: 20px;
         border: 1px solid #888;
-        width: 80%;
-        max-width: 1000px;
+        width: 90%;
+        max-width: 1200px; /* 모달의 최대 너비를 키움 */
         position: relative;
         text-align: center;
     }
 
     .modal-content img {
         width: 100%;
-        height: 500px;
-        object-fit: cover;
+        height: auto;
+        max-height: 700px; /* 모달 안의 이미지 최대 높이 설정 */
+        object-fit: contain;
+        background-color: white;
     }
 
     .close-btn {
@@ -103,29 +107,60 @@
 
     .artworks-list {
         display: none;
-        padding: 20px;
+        padding: 30px;
         background-color: white;
         border-top: 1px solid #ccc;
         text-align: center;
+        max-width: 1400px; /* 상자의 최대 너비를 더욱 늘림 */
+        margin: auto;
     }
 
     .artworks-grid {
         display: flex;
         flex-wrap: wrap;
-        gap: 10px;
+        gap: 20px; /* 간격을 조금 더 넓힘 */
         justify-content: center;
     }
 
     .artworks-grid img {
-        width: 250px; /* 모든 이미지의 너비를 250px로 고정 */
-        height: 250px; /* 모든 이미지의 높이를 250px로 고정 */
-        object-fit: cover; /* 이미지를 비율에 맞게 자르고, 전체를 채움 */
+        width: 350px; /* 이미지의 너비를 늘림 */
+        height: 350px; /* 이미지의 높이를 늘림 */
+        object-fit: contain;
+        background-color: white;
         border-radius: 5px;
         transition: transform 0.3s ease;
+        cursor: pointer; /* 이미지에 마우스를 올렸을 때 커서를 변경 */
     }
 
     .artworks-grid img:hover {
         transform: scale(1.05);
+    }
+
+    /* 큰 이미지를 표시하기 위한 모달 */
+    .large-image-modal {
+        display: none;
+        position: fixed;
+        z-index: 2;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        overflow: auto;
+        background-color: rgba(0, 0, 0, 0.9);
+        align-items: center;
+        justify-content: center;
+    }
+
+    .large-image-modal-content {
+        margin: auto;
+        padding: 20px;
+        width: 90%;
+        max-width: 1000px;
+    }
+
+    .large-image-modal-content img {
+        width: 100%;
+        height: auto;
     }
 </style>
 
@@ -159,11 +194,22 @@
     {% endfor %}
 </div>
 
+<!-- 큰 이미지를 표시할 모달 -->
+<div id="largeImageModal" class="large-image-modal">
+    <div class="large-image-modal-content">
+        <span class="close-btn">&times;</span>
+        <img id="largeImage" src="" alt="Large Artwork">
+    </div>
+</div>
+
 <script>
     document.addEventListener('DOMContentLoaded', function () {
         var modals = document.querySelectorAll('.modal');
         var closeButtons = document.querySelectorAll('.close-btn');
         var artworkButtons = document.querySelectorAll('.view-artworks-btn');
+        var artworkImages = document.querySelectorAll('.artwork-image');
+        var largeImageModal = document.getElementById('largeImageModal');
+        var largeImage = document.getElementById('largeImage');
 
         document.querySelectorAll('.grid-item a').forEach(function (item) {
             item.addEventListener('click', function (e) {
@@ -191,6 +237,20 @@
                 this.scrollIntoView({ behavior: 'smooth' });
             });
         });
+
+        // 이미지 클릭 시 큰 이미지 모달 열기
+        artworkImages.forEach(function (img) {
+            img.addEventListener('click', function () {
+                largeImage.src = this.src;
+                largeImageModal.style.display = 'flex';
+            });
+        });
+
+        // 큰 이미지 모달 닫기
+        largeImageModal.querySelector('.close-btn').addEventListener('click', function () {
+            largeImageModal.style.display = 'none';
+        });
     });
 </script>
+
 {% endblock %}
