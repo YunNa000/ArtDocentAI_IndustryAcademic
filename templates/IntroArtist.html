@@ -58,21 +58,23 @@
     .modal-content {
         background-color: #fefefe;
         margin: auto;
-        padding: 20px;
+        padding: 15px;
         border: 1px solid #888;
-        width: 90%;
-        max-width: 1200px; /* 모달의 최대 너비를 키움 */
+        width: 80%; /* 모달 창 너비를 화면의 80%로 설정 */
+        max-width: 500px; /* 모달 창의 최대 너비를 500px로 설정 */
+        max-height: 70vh; /* 모달 창의 최대 높이를 화면 높이의 70%로 제한 */
+        overflow-y: auto; /* 내용이 많을 때 모달 내부에서 스크롤 가능 */
         position: relative;
         text-align: center;
     }
-
+    
     .modal-content img {
-        width: 100%;
+        width: 100%; /* 이미지 너비를 모달의 너비에 맞춤 */
         height: auto;
-        max-height: 700px; /* 모달 안의 이미지 최대 높이 설정 */
-        object-fit: contain;
-        background-color: white;
+        max-height: 30vh; /* 이미지의 최대 높이를 뷰포트 높이의 60%로 제한 */
+        object-fit: contain; /* 이미지가 잘리지 않고 비율에 맞게 조정 */
     }
+    
 
     .close-btn {
         position: absolute;
@@ -105,20 +107,10 @@
         background-color: #0056b3;
     }
 
-    .artworks-list {
-        display: none;
-        padding: 30px;
-        background-color: white;
-        border-top: 1px solid #ccc;
-        text-align: center;
-        max-width: 1400px; /* 상자의 최대 너비를 더욱 늘림 */
-        margin: auto;
-    }
-
     .artworks-grid {
         display: flex;
         flex-wrap: wrap;
-        gap: 20px; /* 간격을 조금 더 넓힘 */
+        gap: 30px; /* 간격을 조금 더 넓힘 */
         justify-content: center;
     }
 
