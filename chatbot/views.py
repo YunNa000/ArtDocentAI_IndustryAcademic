@@ -8,16 +8,21 @@ import json
 import numpy as np
 import pandas as pd
 import os
-import openai
+from openai import OpenAI
 
 from transformers import BertModel, BertTokenizer
 import torch
 from sklearn.metrics.pairwise import cosine_similarity
 from dotenv import load_dotenv
+import os
+
+이전질문=""
+# OpenAI API 키 설정
+os.environ["OPENAI_API_KEY"] = "sk-aFJRETdDOQESCqNw-WLBzCJnRzO41MC5JbD7L9AXUuT3BlbkFJeZd0hArFTPw0avxSRd3EN7YB3K740NBj3n3cfdCWsA"
 
 load_dotenv()
 # OpenAI API 키 설정
-openai.api_key = "sk-proj-8Jje3SgQi9NS02pKp4lfT3BlbkFJkrUa1Naus9phlHGC2Ack" #os.getenv("OPENAI_API_KEY")
+client = OpenAI(api_key="sk-aFJRETdDOQESCqNw-WLBzCJnRzO41MC5JbD7L9AXUuT3BlbkFJeZd0hArFTPw0avxSRd3EN7YB3K740NBj3n3cfdCWsA")
 
 # 데이터 로드 및 모델 초기화
 train_df_new = pd.read_excel('chatbot/static/xlsx/tokenized_semart_train_combined.xlsx')
@@ -126,19 +131,9 @@ def calculate_string_score(string_list, substring):
             return 1
     return 0
 
-# GPT-3 API 호출 함수
-def call_gpt_api(prompt):
-    response = openai.ChatCompletion.create(
-        model='gpt-4o-2024-05-13',
-        messages=[
-            {"role": "system", "content": "You are a helpful assistant."},
-            {"role": "user", "content": prompt},
-        ]
-    )
-    return response['choices'][0]['message']['content'].strip()
-
+from langchain_openai import OpenAIEmbeddings
 from langchain_community.vectorstores import FAISS
-from langchain_community.embeddings import HuggingFaceEmbeddings
+from langchain_huggingface import HuggingFaceEmbeddings
 
 # Hugging Face 임베딩 모델 생성
 embeddings_model = HuggingFaceEmbeddings(
@@ -151,8 +146,14 @@ embeddings_model = HuggingFaceEmbeddings(
 faiss_index_path = './chatbot/db/faiss'
 faiss1_index_path = './chatbot/db/faiss1'
 
-vectorstore = FAISS.load_local(faiss_index_path, embeddings_model, allow_dangerous_deserialization=True)
-vectorstore2 = FAISS.load_local(faiss1_index_path, embeddings_model, allow_dangerous_deserialization=True)
+# vectorstore = FAISS.load_local(faiss_index_path, embeddings_model, allow_dangerous_deserialization=True)
+# vectorstore2 = FAISS.load_local(faiss1_index_path, embeddings_model, allow_dangerous_deserialization=True)
+# FAISS 데이터베이스 경로 설정
+FAISS_DB_PATH = os.path.join(settings.BASE_DIR, "chatbot", "db", "school_images_index")
+
+# FAISS 데이터베이스 불러오기
+embeddings = OpenAIEmbeddings(openai_api_key="sk-aFJRETdDOQESCqNw-WLBzCJnRzO41MC5JbD7L9AXUuT3BlbkFJeZd0hArFTPw0avxSRd3EN7YB3K740NBj3n3cfdCWsA")
+vectorstore = FAISS.load_local(FAISS_DB_PATH, embeddings,allow_dangerous_deserialization=True)
 
 def search_reviews(query):
     # 검색어를 기반으로 벡터 저장소에서 유사한 리뷰 검색
@@ -162,15 +163,16 @@ def search_reviews(query):
     results = []
     for i, review in enumerate(search_result):
         result = {
-            'title': review.metadata['title'],
+            'title': review.metadata['IMAGE_FILE'],
             'content': review.page_content
         }
         results.append(result)
     
     return results
 
+
 def get_json_text(query_text):
-    prompt="""
+    prompt = """
 다음 질문을 기반으로 정보를 키워드 분류해 주세요. 한국어 키워드는 꼭 영어로 적절하게 번역해서 넣어 주세요
 예시 질문:""예수와 동방박사가 나오는 르네상스 시대 프랑스산 가로형 유화 그림 추천해줘. 기법은 점묘화로 이 모든 값들은 알수 없는 것은 null이고 shape는 Vertical,Horizontal만 있어 유일하게 description만 "Jesus Magi Birth"처럼 이 질문을 묘사할 가장 적절한 키워드들을 띄어쓰기로 분류해 검색할 수 있어
 결과를 다음 형식으로 제공해 주세요 절대 주석을 넣거나 영어 번역을 어기면 안됨 코드에 넣을거라:
@@ -179,39 +181,44 @@ def get_json_text(query_text):
     "description": "Jesus Magi",
     "author": null,
     "technique": "Oil",
-    "shape": "Horizonta",'
+    "shape": "Horizontal",
     "type": "Still life",
     "nationality": "French",
     "art form": "Renaissance"
 }
 질문:
-"""+query_text
-    
-    response = openai.ChatCompletion.create(
-        model='gpt-4o-2024-05-13',
-        messages=[
-            {
-                "role": "user",
-                "content": prompt,
-            }
-        ]
-    )
-    
-    answer_text = response['choices'][0]['message']['content'].strip()
-    print("Generated JSON Text: ", answer_text)
-
-    # Remove backticks and any extra text around the JSON object
-    start_idx = answer_text.find('{')
-    end_idx = answer_text.rfind('}') + 1
-    json_text = answer_text[start_idx:end_idx]
+""" + query_text
     
     try:
-        answer_json = json.loads(json_text)
-    except json.JSONDecodeError as e:
-        print("JSONDecodeError: ", str(e))
+        response = client.chat.completions.create(
+            model="gpt-4",  # 또는 "gpt-3.5-turbo"
+            messages=[
+                {
+                    "role": "user",
+                    "content": prompt,
+                }
+            ]
+        )
+        
+        answer_text = response.choices[0].message.content.strip()
+        print("Generated JSON Text: ", answer_text)
+
+        # Remove backticks and any extra text around the JSON object
+        start_idx = answer_text.find('{')
+        end_idx = answer_text.rfind('}') + 1
+        json_text = answer_text[start_idx:end_idx]
+        
+        try:
+            answer_json = json.loads(json_text)
+        except json.JSONDecodeError as e:
+            print("JSONDecodeError: ", str(e))
+            return None
+        
+        return answer_json
+        
+    except Exception as e:
+        print(f"Error in API call: {e}")
         return None
-    
-    return answer_json
     
 
 def get_answer(query_text):
@@ -226,7 +233,7 @@ def get_answer(query_text):
         return pd.DataFrame(), "Failed to parse JSON data"
     
     scoring['total_score'] = 0
-    alpha = 1.2
+    alpha = 1.1
 
     if art_data.title is not None:
         titles=art_data.title.split()
@@ -255,35 +262,35 @@ def get_answer(query_text):
     # if art_data.timeframe is not None:
     #     scoring['scoreTIMEFRAME'] = scoring['TIMEFRAME'].apply(lambda x: calculate_string_score(x, art_data.timeframe))
     #     scoring['total_score'] += scoring['scoreTIMEFRAME'] * alpha
-    scoring.to_csv(r'C:\Users\Admin\Desktop\result_datatitle_scoreing.csv', index=False)  
+    #scoring.to_csv(r'C:\result_datatitle_scoreing.csv', index=False)  
     
-    if art_data.title is not None:
+    if query_text is not None:
         review_data = {}
-        search_result = vectorstore.similarity_search(art_data.title)
+        search_result = vectorstore.similarity_search(query_text)
+
         for i, review in enumerate(search_result):
-            review_data[review.metadata['title']] = {
-                'author': review.metadata['author'],
+            review_data[review.metadata['IMAGE_FILE']] = {
                 'content': review.page_content
             }
-            index = scoring[scoring['TITLE'] == review.metadata['title']].index
+            index = scoring[scoring['IMAGE_FILE'] == review.metadata['IMAGE_FILE']].index
             if not index.empty:
-                scoring.loc[index, 'total_score'] += 1.1
-        print(art_data.title[0])
-        review_data2 = {}
-        search_result = vectorstore2.similarity_search(art_data.title)
-        for i, review in enumerate(search_result):
-            review_data2[review.metadata['title']] = {
-                'author': review.metadata['author'],
-                'content': review.page_content
-            }
-            index = scoring[scoring['TITLE'] == review.metadata['title']].index
-            if not index.empty:
-                scoring.loc[index, 'total_score'] = scoring.loc[index, 'total_score'] + 1.21
+                scoring.loc[index, 'total_score'] += 1.123
+        print(query_text)
+        # review_data2 = {}
+        # search_result = vectorstore2.similarity_search(art_data.title)
+        # for i, review in enumerate(search_result):
+        #     review_data2[review.metadata['title']] = {
+        #         'author': review.metadata['author'],
+        #         'content': review.page_content
+        #     }
+        #     index = scoring[scoring['TITLE'] == review.metadata['title']].index
+        #     if not index.empty:
+        #         scoring.loc[index, 'total_score'] = scoring.loc[index, 'total_score'] + 1.21
 
     result_df = scoring.sort_values('total_score', ascending=False).head(20)
     most_similar_index = result_df['total_score'].idxmax()
     most_similar_title = result_df['TITLE'][most_similar_index]
-    total = "요구사항:이 정보에 기반해서 추천된 작품이야 질문에 맞춰 한국어로 답변을 생성해줘" + "질문:" + query_text + most_similar_title
+    total = "요구사항:이 질문에 기반해서 추천된 작품이야 질문에 맞춰서 묻는 말에만 관련된 정보로 한국어로 답변을 생성해줘" + "질문:" + query_text + most_similar_title
 
     if art_data.title != None:
         total += "제목: " + str(result_df['TITLE'][most_similar_index]) + "\n"
@@ -297,10 +304,11 @@ def get_answer(query_text):
         total += "TYPE: " + str(result_df['TYPE'][most_similar_index]) + "\n"
     if art_data.school != None:
         total += "학교: " + str(result_df['SCHOOL'][most_similar_index]) + "\n"
-
     prompt = "질문:" + query_text + total
-    chat_completion = openai.ChatCompletion.create(
-        model='gpt-4o-2024-05-13',
+
+    # 새로운 API 버전으로 수정
+    stream = client.chat.completions.create(
+        model="gpt-4o-2024-08-06",  # 모델명 수정
         messages=[
             {
                 "role": "user",
@@ -309,28 +317,97 @@ def get_answer(query_text):
         ],
         stream=True
     )
+    
     answer_text = ""
-    for chunk in chat_completion:
-        if hasattr(chunk.choices[0], 'delta') and hasattr(chunk.choices[0].delta, 'content'):
-            content = chunk.choices[0].delta.get("content", "")
-            if content:
-                answer_text += content
-    result_df['시발']=art_data.title
-    # Raw 문자열을 사용하는 방법
-    result_df.to_csv(r'C:\Users\Admin\Desktop\result_datatitle.csv', index=False)
+    for chunk in stream:
+        if chunk.choices[0].delta.content is not None:
+            answer_text += chunk.choices[0].delta.content
+
+    # 결과 저장 경로 수정
+    result_path = os.path.join(settings.BASE_DIR, 'chatbot', 'static', 'results')
+    os.makedirs(result_path, exist_ok=True)
+    
+    result_df['시발'] = art_data.title
+    result_df.to_csv(os.path.join(result_path, 'result_datatitle.csv'), index=False)
+    
     return result_df, answer_text
+
+def get_normal_answer(query_text, 프롬프트="당신은 미술 관련 지식을 전달하는 전문가입니다"):
+    prompt = 프롬프트+" 질문:" + query_text 
+
+    # 새로운 API 버전으로 수정
+    stream = client.chat.completions.create(
+        model="gpt-4o-2024-08-06",  # 모델명 수정
+        messages=[
+            {
+                "role": "user",
+                "content": prompt,
+            }
+        ],
+        stream=True
+    )
+    
+    answer_text = ""
+    for chunk in stream:
+        if chunk.choices[0].delta.content is not None:
+            answer_text += chunk.choices[0].delta.content
+    
+    return answer_text
+
+    # except Exception as e:
+    #     print(f"Error in get_answer: {e}")
+    #     return None, "죄송합니다. 응답을 처리하는 중에 오류가 발생했습니다."
+
+    # prompt = "질문:" + query_text + total
+    # chat_completion = openai.ChatCompletion.create(
+    #     model='gpt-4o-2024-05-13',
+    #     messages=[
+    #         {
+    #             "role": "user",
+    #             "content": prompt,
+    #         }
+    #     ],
+    #     stream=True
+    # )
+    # answer_text = ""
+    # for chunk in chat_completion:
+    #     if hasattr(chunk.choices[0], 'delta') and hasattr(chunk.choices[0].delta, 'content'):
+    #         content = chunk.choices[0].delta.get("content", "")
+    #         if content:
+    #             answer_text += content
+    # result_df['시발']=art_data.title
+    # # Raw 문자열을 사용하는 방법
+    # result_df.to_csv(r'C:\Users\Admin\Desktop\result_datatitle.csv', index=False)
+    # return result_df, answer_text
 
 @csrf_exempt
 def chatanswer(request):
     if request.method == 'POST':
+        global 이전질문
         context = {}
         chattext = request.POST.get('chattext', '')
+        지시문 = "이것은 추천 서비스에 들어온 연속된 질문입니다. 해당 질문 상황이 이전 질문과 연관되어 추가로 요구한 것일 경우.'이전질문'을 입력해주세요. '추천'과 관련이 있을 경우 '추천'을 입력해주세요. 두 가지 모두 콤마로 구분해 답변하거나 공백으로 제출도 가능합니다."
+        분기용정보="이전질문: "+이전질문+" 현재질문: "+chattext
+        분기=get_normal_answer(분기용정보,프롬프트=지시문)
+        result_df=None
+        print(분기)
+        
+        이전질문_임시=chattext
+        if "이전질문" in 분기:
+            # get_answer 함수 호출
+            chattext= "이전질문: "+이전질문+" 현재질문: "+chattext
 
-        # get_answer 함수 호출
-        result_df, answer = get_answer(chattext)
+        if "추천" in 분기:
+            # get_answer 함수 호출
+            result_df, answer = get_answer(chattext)
+        else:
+            answer = get_normal_answer(chattext)
+        print("분기:",분기)
+
         if result_df is None:
             result_df = pd.DataFrame()  # 빈 데이터프레임으로 초기화
-
+        print("질문:",chattext)
+        이전질문=이전질문_임시
         # 데이터프레임을 JSON 형식으로 변환
         result_df_json = result_df.to_json(orient='records')
 
@@ -340,6 +417,7 @@ def chatanswer(request):
         # 이미지 경로 추가
         # image_paths = [f"static/Images/{result_df['IMAGE_FILE'].iloc[0]}"]
         if not result_df.empty and 'IMAGE_FILE' in result_df.columns:
+            print(result_df['IMAGE_FILE'])
             image_paths = [f"static/art-images/{row['IMAGE_FILE']}" for _, row in result_df.iterrows()]
         else:
             image_paths = []
