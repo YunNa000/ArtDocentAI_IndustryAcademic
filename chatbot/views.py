@@ -15,14 +15,14 @@ import torch
 from sklearn.metrics.pairwise import cosine_similarity
 from dotenv import load_dotenv
 import os
-
+key="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"
 이전질문=""
 # OpenAI API 키 설정
-os.environ["OPENAI_API_KEY"] = "sk-aFJRETdDOQESCqNw-WLBzCJnRzO41MC5JbD7L9AXUuT3BlbkFJeZd0hArFTPw0avxSRd3EN7YB3K740NBj3n3cfdCWsA"
+os.environ["OPENAI_API_KEY"] = "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"
 
 load_dotenv()
 # OpenAI API 키 설정
-client = OpenAI(api_key="sk-aFJRETdDOQESCqNw-WLBzCJnRzO41MC5JbD7L9AXUuT3BlbkFJeZd0hArFTPw0avxSRd3EN7YB3K740NBj3n3cfdCWsA")
+client = OpenAI(api_key="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")
 
 # 데이터 로드 및 모델 초기화
 train_df_new = pd.read_excel('chatbot/static/xlsx/tokenized_semart_train_combined.xlsx')
@@ -152,7 +152,7 @@ faiss1_index_path = './chatbot/db/faiss1'
 FAISS_DB_PATH = os.path.join(settings.BASE_DIR, "chatbot", "db", "school_images_index")
 
 # FAISS 데이터베이스 불러오기
-embeddings = OpenAIEmbeddings(openai_api_key="sk-aFJRETdDOQESCqNw-WLBzCJnRzO41MC5JbD7L9AXUuT3BlbkFJeZd0hArFTPw0avxSRd3EN7YB3K740NBj3n3cfdCWsA")
+embeddings = OpenAIEmbeddings(openai_api_key=key)
 vectorstore = FAISS.load_local(FAISS_DB_PATH, embeddings,allow_dangerous_deserialization=True)
 
 def search_reviews(query):
