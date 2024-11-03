@@ -14,16 +14,16 @@ Home - ChatBot Service
 
 <div class="chat-interface">
     {% block chat_content %}
-    <div class="chat-train">
+    <!-- <div class="chat-train">
         <button onclick="chatTrain()" class="train-button">Train Chatbot</button>
-    </div>
+    </div> -->
     <button class="reset-button" onclick="resetFavorites()">&#x21bb;</button>
 
     <div id="chatbox" class="chat-box">
         <!-- 챗봇 콘텐츠 내용 -->
     </div>
     <div class="input-area">
-        <input type="text" id="chattext" class="text-input" placeholder="Type your message here...">
+        <input type="text" id="chattext" class="text-input" placeholder="어떤 그림을 추천받고 싶으신가요?" onkeydown="if(event.key === 'Enter') sendAsk()">
         <button onclick="sendAsk()" class="send-button">SEND</button>
     </div>
     {% endblock %}
@@ -37,7 +37,7 @@ Home - ChatBot Service
         if (document.cookie && document.cookie !== '') {
             var cookies = document.cookie.split(';');
             for (var i = 0; i < cookies.length; i++) {
-                var cookie = jQuery.trim(cookies[i]);
+                var cookie = cookies[i].trim();
                 if (cookie.substring(0, name.length + 1) === (name + '=')) {
                     cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
                     break;
@@ -50,31 +50,40 @@ Home - ChatBot Service
     var csrftoken = getCookie('csrftoken');
 
     function chatTrain() {
-        var strurl = "chattrain";
-        alert(strurl);
-
-        var xhr = new XMLHttpRequest();
-        xhr.onreadystatechange = function () {
-            if (xhr.readyState == 4 && xhr.status == 200) { // 4: 정상, 200: OK
-                var data = xhr.responseText;
-                var obj = JSON.parse(data);
-                alert(obj.result);
-            }
-        };
-        xhr.open("GET", strurl, true);
-        xhr.setRequestHeader("X-CSRFToken", csrftoken);
-        xhr.send(null);
+        fetch('/chattrain', {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': csrftoken,
+                'Content-Type': 'application/json',
+            },
+        })
+        .then(response => response.json())
+        .then(data => {
+            alert(data.result);
+        })
+        .catch(error => console.error('Error:', error));
     }
 
+    window.onload = function() {
+    loadNextImages();
+    displayGreeting(); // 인사말 표시 함수 호출
+    };
+
+    function displayGreeting() {
+        const greetingMessage = "<div style='margin:30px; text-align:left; display:flex; align-items:top;'><img src='{% static '/img/ai_img.jpeg' %}' alt='AI Image' style='width: 40px; height: 40px; margin-right: 10px; border-radius: 50%;'><span style='background-color:#FEFAF6; padding:5px 8px; border-radius:3px; display:inline-block; max-width:60%; word-wrap:break-word;'>안녕하세요! 추천받고 싶은 그림에 대해 질문해 주세요.</span></div>";
+        document.getElementById("chatbox").innerHTML += greetingMessage;
+    }
+
+
     function sendAsk() {
-        var chattext = document.getElementById("chattext").value;
-        if (chattext == "") {
+        const chattext = document.getElementById("chattext").value;
+        if (chattext === "") {
             document.getElementById("chattext").focus();
             return false;
         }
 
-        var addtext = "<div style='margin:20px 20px; text-align:right;'><span style='background-color:#FFFFFF; padding:5px 8px; border-radius:3px; display:inline-block; max-width:60%; word-wrap:break-word;'>" + chattext + "</span></div>";
-        document.getElementById("chatbox").innerHTML += addtext;
+        const userMessage = "<div style='margin:20px; text-align:right;'><span style='background-color:#6C3428; color:#FEFAF6; padding:5px 8px; border-radius:3px; display:inline-block; max-width:60%; word-wrap:break-word;'>" + chattext + "</span></div>";
+        document.getElementById("chatbox").innerHTML += userMessage;
 
         fetch('/chatanswer', {
             method: 'POST',
@@ -88,29 +97,21 @@ Home - ChatBot Service
         })
         .then(response => response.json())
         .then(data => {
-                var gpt_response = "<div style='margin:20px; text-align:left; display:flex; align-items:center;'><img src='{% static 'assets/img/ai_img.jpeg' %}' alt='AI Image' style='width: 40px; height: 40px; margin-right: 10px; border-radius: 50%;'><span style='background-color:#FEFAF6; padding:5px 8px; border-radius:3px; display:inline-block; max-width:60%; word-wrap:break-word;'>" + data.answer + "</span></div>";
+            let gptResponse = "<div style='margin:30px; text-align:left; display:flex; align-items:top;'><img src='{% static '/img/ai_img.jpeg' %}' alt='AI Image' style='width: 40px; height: 40px; margin-right: 10px; border-radius: 50%;'><span style='background-color:#FEFAF6; padding:5px 8px; border-radius:3px; display:inline-block; max-width:60%; word-wrap:break-word;'>" + data.answer + "</span></div>";
 
-                if (data.image_paths && data.image_paths.length > 0) {
-                    data.image_paths.forEach((path, index) => {
-                        if(index === 0){
-                            gpt_response += "<img src='" + path + "' style='max-width:30%; margin-top: 10px;'>";
-                        } else {
-                            gallery_images.push(path);
-                        }
-                    });
-                }
+            if (data.image_paths && data.image_paths.length > 0) {
+                data.image_paths.forEach((path, index) => {
+                    gallery_images.push(path);  
+                });
+            }
 
-                gpt_response += "</div>";
+            document.getElementById("chatbox").innerHTML += gptResponse;
+            document.getElementById("chatbox").scrollTop = document.getElementById("chatbox").scrollHeight;
+            document.getElementById("chattext").value = "";
 
-                document.getElementById("chatbox").innerHTML += gpt_response;
-
-                var mydiv = document.getElementById("chatbox");
-                mydiv.scrollTop = document.getElementById("chatbox").scrollHeight;
-                document.getElementById("chattext").value = "";
-
-                loadNextImages();
-            })
-            .catch(error => console.error('Error:', error));
+            loadNextImages();
+        })
+        .catch(error => console.error('Error:', error));
     }
 
     function toggleFavorite(imageSrc, heartButton) {
@@ -118,14 +119,12 @@ Home - ChatBot Service
         const index = favorites.indexOf(imageSrc);
 
         if (index > -1) {
-            // Remove favorite if it exists
             favorites.splice(index, 1);
-            heartButton.innerHTML = "&#9825;"; // 빈 하트로 변경
+            heartButton.innerHTML = "&#9825;";
             heartButton.classList.remove('favorite');
         } else {
-            // Add to favorites if it doesn't exist
             favorites.push(imageSrc);
-            heartButton.innerHTML = "&#10084;"; // 빨간 하트로 변경
+            heartButton.innerHTML = "&#10084;";
             heartButton.classList.add('favorite');
         }
 
@@ -138,39 +137,46 @@ Home - ChatBot Service
         loadNextImages();
     }
 
-    var gallery_images = JSON.parse('{{ image_urls|escapejs }}');  // 서버에서 전달된 이미지 URL 리스트
+    var gallery_images = JSON.parse('{{ image_urls|escapejs }}');
 
     function loadNextImages() {
-        var gallery = document.getElementById("gallery");
-        gallery.innerHTML = "";
+    const gallery = document.getElementById("gallery");
+    gallery.innerHTML = "";
 
-        var images = gallery_images.slice(0, 9);
-        gallery_images = gallery_images.slice(9);
+    // 상위 6개의 이미지만 가져오기 (첫 번째 이미지는 2x2, 나머지 5개는 1x1으로 표시)
+    const images = gallery_images.slice(0, 6);
+    gallery_images = gallery_images.slice(6); // 다음 이미지를 위해 배열 갱신
 
-        let favorites = JSON.parse(localStorage.getItem('favorites')) || [];
-        images.forEach(function (imageSrc, index) {
-            var imgContainer = document.createElement("div");
-            imgContainer.className = "gallery-item";
+    let favorites = JSON.parse(localStorage.getItem('favorites')) || [];
 
-            var imgElement = document.createElement("img");
-            imgElement.src = imageSrc;
+    images.forEach((imageSrc, index) => {
+        const imgContainer = document.createElement("div");
 
-            var heartButton = document.createElement("button");
-            heartButton.className = "heart-button";
-            heartButton.innerHTML = "&#9825;"; // 빈 하트
-            if (favorites.includes(imageSrc)) {
-                heartButton.innerHTML = "&#10084;"; // 빨간 하트
-                heartButton.classList.add('favorite');
-            }
-            heartButton.onclick = function () {
-                toggleFavorite(imageSrc, heartButton);
-            };
+        // 가장 랭크가 높은 첫 번째 이미지를 2x2 크기로 설정
+        if (index === 0) {
+            imgContainer.className = "gallery-item large";
+        } else {
+            imgContainer.className = "gallery-item small";
+        }
 
-            imgContainer.appendChild(imgElement);
-            imgContainer.appendChild(heartButton);
-            gallery.appendChild(imgContainer);
-        });
-    }
+        const imgElement = document.createElement("img");
+        imgElement.src = imageSrc;
+
+        // 좋아요 버튼 설정
+        const heartButton = document.createElement("button");
+        heartButton.className = "heart-button";
+        heartButton.innerHTML = favorites.includes(imageSrc) ? "&#10084;" : "&#9825;";
+        heartButton.classList.toggle('favorite', favorites.includes(imageSrc));
+        heartButton.onclick = function() {
+            toggleFavorite(imageSrc, heartButton);
+        };
+
+        imgContainer.appendChild(imgElement);
+        imgContainer.appendChild(heartButton);
+        gallery.appendChild(imgContainer);
+    });
+}
+
 
     window.onload = function () {
         loadNextImages();
@@ -183,23 +189,57 @@ Home - ChatBot Service
         margin: 10px;
     }
 
+    .gallery-container {
+        display: grid;
+        height: 730px;
+        width: 100px;
+
+        grid-template-columns: repeat(3, 1fr); /* 3개의 열로 구성 */
+        grid-template-rows: repeat(3, 1fr);    /* 3개의 행으로 구성 */
+        gap: 10px;
+        background-color: rgb(82, 65, 65);
+    }
+
     .heart-button {
         position: absolute;
         top: 10px;
-        right: 10px;
+        right: 7px;
         background: none;
         border: none;
-        font-size: 24px;
+        font-size: 20px;
         cursor: pointer;
         transition: color 0.3s ease;
     }
 
     .heart-button.favorite {
-        color: red;
+        color: rgb(233, 90, 90);
     }
 
     .heart-button:hover {
         color: pink;
     }
+
+    .gallery-item.large {
+        grid-column: span 2; /* 2열을 차지 */
+        grid-row: span 2;    /* 2행을 차지 */
+        width: 330px;
+        height: 455px;
+    }
+
+    .gallery-item.small {
+        width: 150px;
+        height: 210px;
+    }
+
+
+    .text-input {
+        width: 80%;
+        height: 30px;
+        flex: 1;
+        padding: 10px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+    }
+
 </style>
 {% endblock %}

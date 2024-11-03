@@ -4,6 +4,7 @@ from django.views.decorators.csrf import csrf_exempt
 import random
 from django.conf import settings
 
+import markdown2
 import json
 import numpy as np
 import pandas as pd
@@ -15,21 +16,18 @@ import torch
 from sklearn.metrics.pairwise import cosine_similarity
 from dotenv import load_dotenv
 import os
-key="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"
+key="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"
 이전질문=""
 # OpenAI API 키 설정
-os.environ["OPENAI_API_KEY"] = "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"
+os.environ["OPENAI_API_KEY"] =key 
 
 load_dotenv()
 # OpenAI API 키 설정
-client = OpenAI(api_key="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")
+client = OpenAI(api_key = key)
 
 # 데이터 로드 및 모델 초기화
-train_df_new = pd.read_excel('chatbot/static/xlsx/tokenized_semart_train_combined.xlsx')
-val_df_new = pd.read_excel('chatbot/static/xlsx/tokenized_semart_val_combined.xlsx')
-test_df_new = pd.read_excel('chatbot/static/xlsx/tokenized_semart_test_combined.xlsx')
-all_df = pd.concat([train_df_new, val_df_new, test_df_new], ignore_index=True)
-
+all_df = pd.read_excel('chatbot\static/xlsx/finaldata_cleaned.xlsx')
+    
 def home(request):
     if settings.DEBUG:
         image_directory = os.path.join(settings.STATICFILES_DIRS[0], 'art-images')
@@ -121,7 +119,7 @@ def calculate_director_score(directors,directors_to_check):
 def calculate_string_score1(string, substrings):
     score = 0
     for substring in substrings:
-        if substring.lower() in string.lower():
+        if substring.lower() in string:
             score += 0.5
     return score
 
@@ -157,7 +155,7 @@ vectorstore = FAISS.load_local(FAISS_DB_PATH, embeddings,allow_dangerous_deseria
 
 def search_reviews(query):
     # 검색어를 기반으로 벡터 저장소에서 유사한 리뷰 검색
-    search_result = vectorstore.similarity_search(query, k=5)
+    search_result = vectorstore.similarity_search(query, k=10)
     
     # 검색 결과 출력
     results = []
@@ -173,21 +171,39 @@ def search_reviews(query):
 
 def get_json_text(query_text):
     prompt = """
-다음 질문을 기반으로 정보를 키워드 분류해 주세요. 한국어 키워드는 꼭 영어로 적절하게 번역해서 넣어 주세요
-예시 질문:""예수와 동방박사가 나오는 르네상스 시대 프랑스산 가로형 유화 그림 추천해줘. 기법은 점묘화로 이 모든 값들은 알수 없는 것은 null이고 shape는 Vertical,Horizontal만 있어 유일하게 description만 "Jesus Magi Birth"처럼 이 질문을 묘사할 가장 적절한 키워드들을 띄어쓰기로 분류해 검색할 수 있어
-결과를 다음 형식으로 제공해 주세요 절대 주석을 넣거나 영어 번역을 어기면 안됨 코드에 넣을거라:
-예시 답변:
-{
-    "description": "Jesus Magi",
-    "author": null,
-    "technique": "Oil",
-    "shape": "Horizontal",
-    "type": "Still life",
-    "nationality": "French",
-    "art form": "Renaissance"
-}
-질문:
-""" + query_text
+    다음 질문을 기반으로 미술 작품 관련 정보를 키워드로 분류해 주세요. 한국어 키워드는 영어로 적절하게 번역해서 넣어 주세요.
+
+    예시 질문: "예수와 동방박사가 나오는 르네상스 시대 프랑스산 가로형 유화 그림을 찾아줘"
+
+    가능한 값들:
+    {
+        "author": null,  # 작가를 모를 경우 null
+        "technique": ["Oil", "Tempera", "Watercolor", "Gouache", "Ink", "Charcoal", "Pastel", "Pencil", "Lithograph", "Etching", "Enamel", "Egg", "Graphite", "Distemper", "Bronze", "Gold", "Silver", "Woodcu"],
+        "shape": ["Horizontal", "Vertical"],
+        "type": ["Genre", "Historical", "Interior", "Landscape", "Mythological", "Portrait", "Religious", "Still life", "Study"],
+        "school": ["American", "Austrian", "Belgian", "Bohemian", "Catalan", "Danish", "Dutch", "English", "Finnish", "Flemish", "French", "German", "Greek", "Hungarian", "Irish", "Italian", "Netherlandish", "Norwegian", "Polish", "Portuguese", "Russian", "Scottish", "Spanish", "Swedish", "Swiss"],
+        "art_form": ["Art", "Baroque", "Impressionism", "Medieval", "Neoclassicism", "Nouveau", "Period", "Post-Impressionism", "Realism", "Renaissance", "Rococo", "Romanticism"]
+    }
+
+    출력 형식은 다음과 같아야 합니다:
+    {
+        "author": null,  # 작가 미상일 경우
+        "technique": "Oil", # 하나의 문자열만 입력 or null
+        "shape":"Horizontal",  # 하나의 문자열만 입력 or null
+        "type": "Religious",   # 하나의 문자열만 입력 or null
+        "school": "French",   # 하나의 문자열만 입력 or null
+        "art_form": "Renaissance"  # 하나의 문자열만 입력
+    }
+
+    주의사항:
+    1. 확실하지 않은 정보는 반드시 null로 처리
+    2. 각 필드당 최대 2개까지만 값 입력 가능
+    3. 모든 값은 제시된 옵션 중에서만 선택
+    4. 한국어 키워드는 반드시 영어로 변환
+    5. 각 배열은 오름차순으로 정렬
+
+    질문:
+    """ + query_text
     
     try:
         response = client.chat.completions.create(
@@ -236,12 +252,13 @@ def get_answer(query_text):
     alpha = 1.1
 
     if art_data.title is not None:
-        titles=art_data.title.split()
+        titles=art_data.title[0].split()
         scoring['scoreTITLE'] = scoring['TITLE'].apply(lambda x: calculate_string_score1(x, titles))
         scoring['total_score'] += scoring['scoreTITLE'] * alpha
-
+    print(art_data.author)
     if art_data.author is not None:
-        scoring['scoreAUTHOR'] = scoring['AUTHOR'].apply(lambda x: calculate_string_score([x], art_data.author))
+        Author = art_data.author.lower().split()
+        scoring['scoreAUTHOR'] = scoring['AUTHOR'].apply(lambda x: calculate_string_score1(x, Author))
         scoring['total_score'] += scoring['scoreAUTHOR'] * alpha
 
     if art_data.technique is not None:
@@ -276,34 +293,40 @@ def get_answer(query_text):
             if not index.empty:
                 scoring.loc[index, 'total_score'] += 1.123
         print(query_text)
-        # review_data2 = {}
-        # search_result = vectorstore2.similarity_search(art_data.title)
-        # for i, review in enumerate(search_result):
-        #     review_data2[review.metadata['title']] = {
-        #         'author': review.metadata['author'],
-        #         'content': review.page_content
-        #     }
-        #     index = scoring[scoring['TITLE'] == review.metadata['title']].index
-        #     if not index.empty:
-        #         scoring.loc[index, 'total_score'] = scoring.loc[index, 'total_score'] + 1.21
 
-    result_df = scoring.sort_values('total_score', ascending=False).head(20)
-    most_similar_index = result_df['total_score'].idxmax()
-    most_similar_title = result_df['TITLE'][most_similar_index]
-    total = "요구사항:이 질문에 기반해서 추천된 작품이야 질문에 맞춰서 묻는 말에만 관련된 정보로 한국어로 답변을 생성해줘" + "질문:" + query_text + most_similar_title
 
-    if art_data.title != None:
-        total += "제목: " + str(result_df['TITLE'][most_similar_index]) + "\n"
-    if art_data.author != None:
-        total += "작가: " + str(result_df['AUTHOR'][most_similar_index]) + "\n"
-    if art_data.technique != None:
-        total += "technique: " + str(result_df['TECHNIQUE'][most_similar_index]) + "\n"
-    if art_data.shape != None:
-        total += "SHAPE: " + str(result_df['SHAPE'][most_similar_index]) + "\n"
-    if art_data.type != None:
-        total += "TYPE: " + str(result_df['TYPE'][most_similar_index]) + "\n"
-    if art_data.school != None:
-        total += "학교: " + str(result_df['SCHOOL'][most_similar_index]) + "\n"
+    
+
+    result_df = scoring.sort_values('total_score', ascending=False).head(18).reset_index(drop=True)
+    most_similar_title = result_df['TITLE'][0]
+    total = "요구사항:이 질문에 기반해서 추천된 작품들이야 질문에 맞춰서 묻는 말에만 관련된 정보로 한국어로 답변을 생성해줘" + "질문:" + query_text + most_similar_title
+    total +="추천 창에 출력된 그림 리스트"
+    for i in range(6):
+        total+= str(i)+":"
+        if i == 0:
+            total +="가장 크게 출력됨"
+        if i == 1:
+            total +="오른쪽 위에 출력됨"
+        if i == 2:
+            total +="오른쪽 중앙에 출력됨"
+        if i == 3:
+            total +="왼쪽 아래에 출력됨"
+        if i == 4:
+            total +=" 아래쪽 중앙에 출력됨"
+        if i == 5:
+            total +="오른쪽 아래에 출력됨"
+        total += "제목: " + str(result_df['TITLE'][i]) + "\n"
+        if art_data.author != None:
+            total += "작가: " + str(result_df['AUTHOR'][i]) + "\n"
+        if art_data.technique != None:
+            total += "technique: " + str(result_df['TECHNIQUE'][i]) + "\n"
+        if art_data.shape != None:
+            total += "SHAPE: " + str(result_df['SHAPE'][i]) + "\n"
+        if art_data.type != None:
+            total += "TYPE: " + str(result_df['TYPE'][i]) + "\n"
+        if art_data.school != None:
+            total += "학교: " + str(result_df['SCHOOL'][i]) + "\n"
+        total += "설명: " + str(result_df['description_final'][i]) + "\n"
     prompt = "질문:" + query_text + total
 
     # 새로운 API 버전으로 수정
@@ -327,9 +350,12 @@ def get_answer(query_text):
     result_path = os.path.join(settings.BASE_DIR, 'chatbot', 'static', 'results')
     os.makedirs(result_path, exist_ok=True)
     
-    result_df['시발'] = art_data.title
-    result_df.to_csv(os.path.join(result_path, 'result_datatitle.csv'), index=False)
-    
+    result_df['제목'] = art_data.title
+    try:
+        result_df.to_excel(os.path.join(result_path, 'result_datatitle.xlsx'), index=False)
+    except Exception as e:
+        print(f"Error in saving result_df: {e}")
+
     return result_df, answer_text
 
 def get_normal_answer(query_text, 프롬프트="당신은 미술 관련 지식을 전달하는 전문가입니다"):
@@ -393,15 +419,20 @@ def chatanswer(request):
         print(분기)
         
         이전질문_임시=chattext
-        if "이전질문" in 분기:
+        if ("이전질문" in 분기) and 이전질문!="":
             # get_answer 함수 호출
             chattext= "이전질문: "+이전질문+" 현재질문: "+chattext
 
-        if "추천" in 분기:
-            # get_answer 함수 호출
-            result_df, answer = get_answer(chattext)
-        else:
-            answer = get_normal_answer(chattext)
+        # if "추천" in 분기:
+        #     # get_answer 함수 호출
+        result_df, answer = get_answer(chattext)
+        #else:
+        #    answer = get_normal_answer(chattext)
+
+        
+        answer = markdown2.markdown(answer.replace("\n", "  \n")) # !!!!!!! Markdown 변환을 사용하여 답변 가독성 개선
+
+        print(answer)
         print("분기:",분기)
 
         if result_df is None:
@@ -415,13 +446,13 @@ def chatanswer(request):
         context['answer'] = answer  # GPT-3 응답
 
         # 이미지 경로 추가
+        image_paths = []
         # image_paths = [f"static/Images/{result_df['IMAGE_FILE'].iloc[0]}"]
         if not result_df.empty and 'IMAGE_FILE' in result_df.columns:
             print(result_df['IMAGE_FILE'])
             image_paths = [f"static/art-images/{row['IMAGE_FILE']}" for _, row in result_df.iterrows()]
         else:
             image_paths = []
-
         context['image_paths'] = image_paths
 
         return JsonResponse(context, content_type="application/json")
