@@ -451,7 +451,7 @@ def chatanswer(request):
         if not result_df.empty and 'IMAGE_FILE' in result_df.columns:
             result_images = result_df.head(6)
             print(result_df['IMAGE_FILE'])
-            image_paths = [f"static/art-images/{row['IMAGE_FILE']}" for _, row in result_df.iterrows()]
+            image_paths = [f"static/art-images/{row['IMAGE_FILE']}" for _, row in result_images.iterrows()]
         else:
             image_paths = []
         context['image_paths'] = image_paths
