@@ -1,0 +1,171 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}
+팀원 소개 - ChatBot Service
+{% endblock %}
+
+{% block content %}
+<div class="team-intro-container">
+    {% block team_content %}
+    <div id="team" class="team-intro"></div>
+    {% block styles %}
+    <style>
+        .team-intro-container {
+            max-width: 100%; /* 최대 너비를 100%로 설정 */
+            margin: auto; /* 페이지 중앙 정렬 */
+            padding: 20px; /* 내부 여백 추가 */
+            padding-left: 40px; /* 왼쪽 여백 추가 */
+            box-sizing: border-box; /* padding 포함한 크기 계산 */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+        }
+
+        .team-table {
+            width: 100%; /* 테이블 전체 너비 */
+            max-width: 1300px; /* 테이블의 최대 너비 설정 */
+            border-collapse: collapse; /* 테이블 셀 경계선 겹침 */
+            margin-top: 20px; /* 상단 여백 추가 */
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .team-table td {
+            border: 1px solid #ddd; /* 경계선 색상 변경 */
+            padding: 15px; /* 패딩 증가 */
+            vertical-align: middle; /* 셀 내용 중앙 정렬 */
+            background-color: #ffffff; /* 셀 배경색 */
+        }
+
+        .team-member-cell {
+            width: 50%; /* 각 셀 너비 */
+            text-align: center; /* 텍스트 중앙 정렬 */
+        }
+
+        .team-member {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            transition: transform 0.3s; /* 애니메이션 효과 */
+            width: 100%; /* 가로 크기 100% */
+            box-sizing: border-box; /* padding 포함한 크기 계산 */
+        }
+
+        .team-member:hover {
+            transform: scale(1.05); /* 호버 시 확대 효과 */
+        }
+
+        .team-member img {
+            width: 150px; /* 이미지 크기 증가 */
+            height: 150px;
+            border-radius: 50%;
+            border: 3px solid #007bff; /* 테두리 색상 변경 */
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2); /* 그림자 강조 */
+        }
+
+        .team-member-info {
+            text-align: center;
+            margin-top: 15px;
+        }
+
+        .team-member-info h3 {
+            font-size: 1.8em; /* 글씨 크기 증가 */
+            color: #333; /* 글씨 색상 변경 */
+        }
+
+        .team-member-info p {
+            font-size: 1.1em; /* 글씨 크기 조정 */
+            color: #666; /* 글씨 색상 변경 */
+        }
+    </style>
+    {% endblock %}
+    {% endblock %}
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    var teamMembers = [
+        {
+            name: "주윤나 (팀장)",
+            role: "팀 리딩, 데이터 전처리, GPT 모델 설계, 웹 프론트엔드",
+            skills: "프로그래밍 언어(Python, Java, Dart), 데이터 처리 및 분석, 머신러닝",
+            image: '{% static "img/jyn.png" %}'
+        },
+        {
+            name: "묘은위",
+            role: "데이터 전처리, GPT 모델 설계, 웹 백엔드",
+            skills: "프로그래밍 언어(Python, Java, Dart), 데이터 처리 및 분석, 머신러닝",
+            image: '{% static "img/myw.png" %}'
+        },
+        {
+            name: "손원택",
+            role: "데이터 전처리, GPT 모델 설계, 웹 프론트엔드",
+            skills: "프로그래밍 언어(Python, Java, Dart), 데이터 처리 및 분석, 머신러닝",
+            image: '{% static "img/swt.png" %}'
+        },
+        {
+            name: "황승택",
+            role: "데이터 전처리, GPT 모델 설계, 웹 백엔드",
+            skills: "프로그래밍 언어(Python, Java, Dart), 데이터 처리 및 분석, 머신러닝",
+            image: '{% static "img/hst.png" %}'
+        }
+    ];
+
+    function loadTeamMembers() {
+        var teamContainer = document.getElementById("team");
+        teamContainer.innerHTML = ""; 
+
+        var table = document.createElement("table");
+        table.className = "team-table";
+
+        for (var i = 0; i < teamMembers.length; i += 2) {
+            var row = document.createElement("tr");
+
+            for (var j = i; j < i + 2 && j < teamMembers.length; j++) {
+                var cell = document.createElement("td");
+                cell.className = "team-member-cell";
+
+                var memberContainer = document.createElement("div");
+                memberContainer.className = "team-member";
+
+                var imgElement = document.createElement("img");
+                imgElement.src = teamMembers[j].image;
+                imgElement.alt = teamMembers[j].name;
+
+                var memberInfo = document.createElement("div");
+                memberInfo.className = "team-member-info";
+
+                var memberName = document.createElement("h3");
+                memberName.textContent = teamMembers[j].name;
+
+                var memberRole = document.createElement("p");
+                memberRole.textContent = "역할: " + teamMembers[j].role;
+
+                var memberSkills = document.createElement("p");
+                memberSkills.textContent = "스킬: " + teamMembers[j].skills;
+
+                memberInfo.appendChild(memberName);
+                memberInfo.appendChild(memberRole);
+                memberInfo.appendChild(memberSkills);
+
+                memberContainer.appendChild(imgElement);
+                memberContainer.appendChild(memberInfo);
+                cell.appendChild(memberContainer);
+                row.appendChild(cell);
+            }
+
+            table.appendChild(row);
+        }
+
+        teamContainer.appendChild(table);
+    }
+
+    window.onload = function() {
+        loadTeamMembers(); // 페이지 로드 시 팀원 정보를 로드
+    }
+</script>
+{% endblock %}

@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    {% load static %}
+    <link href="{% static 'css/styles.css' %}" rel="stylesheet">
+    <title>{% block title %}Home - ChatBot Service{% endblock %}</title>
+    {% block styles %}{% endblock %}  <!-- CSS Injection Point -->
+</head>
+<body>
+    <div class="sidebar">
+        {% block sidebar %}
+        <ul class="nav flex-column">
+            <div class="menu-title">
+                Menu
+            </div>
+            <li class="nav-item">
+                <a href="/home" class="nav-link">메인 화면</a>
+            </li>
+            <li class="nav-item">
+                <a href="/IntroTeam" class="nav-link">팀원 소개</a>
+            </li>
+            <li class="nav-item">
+                <a href="/IntroArtist" class="nav-link">작가 소개</a>
+            </li>
+            <li class="nav-item">
+                <a href="/favorite" class="nav-link">선호 작품</a>
+            </li>
+        </ul>
+        {% endblock %}
+    </div>
+
+    {% block content %}
+    {% endblock %}
+
+    {% block scripts %}
+    {% endblock %}
+</body>
+</html>
