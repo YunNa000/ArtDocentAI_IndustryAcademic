@@ -98,12 +98,13 @@ Home - ChatBot Service
         .then(response => response.json())
         .then(data => {
             let gptResponse = "<div style='margin:30px; text-align:left; display:flex; align-items:top;'><img src='{% static '/img/ai_img.jpeg' %}' alt='AI Image' style='width: 40px; height: 40px; margin-right: 10px; border-radius: 50%;'><span style='background-color:#FEFAF6; padding:5px 8px; border-radius:3px; display:inline-block; max-width:60%; word-wrap:break-word;'>" + data.answer + "</span></div>";
-
+            gallery_images = [];
             if (data.image_paths && data.image_paths.length > 0) {
                 data.image_paths.forEach((path, index) => {
                     gallery_images.push(path);  
                 });
             }
+
 
             document.getElementById("chatbox").innerHTML += gptResponse;
             document.getElementById("chatbox").scrollTop = document.getElementById("chatbox").scrollHeight;

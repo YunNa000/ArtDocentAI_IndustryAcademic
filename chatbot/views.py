@@ -35,7 +35,7 @@ def home(request):
         image_directory = os.path.join(settings.STATIC_ROOT, 'art-images')
 
     all_images = [f for f in os.listdir(image_directory) if os.path.isfile(os.path.join(image_directory, f))]
-    random_images = random.sample(all_images, 9) if len(all_images) >= 9 else all_images
+    random_images = random.sample(all_images, 9) if len(all_images) >= 9 else all_images#수정
     image_urls = [os.path.join(settings.STATIC_URL, 'art-images', img) for img in random_images]
 
     return render(request, "home.html", {'image_urls': json.dumps(image_urls)})
@@ -450,7 +450,9 @@ def chatanswer(request):
         # image_paths = [f"static/Images/{result_df['IMAGE_FILE'].iloc[0]}"]
         if not result_df.empty and 'IMAGE_FILE' in result_df.columns:
             print(result_df['IMAGE_FILE'])
-            image_paths = [f"static/art-images/{row['IMAGE_FILE']}" for _, row in result_df.iterrows()]
+            result_images = result_df.head(18)
+            print(result_df['IMAGE_FILE'])
+            image_paths = [f"static/art-images/{row['IMAGE_FILE']}" for _, row in result_images.iterrows()]
         else:
             image_paths = []
         context['image_paths'] = image_paths
