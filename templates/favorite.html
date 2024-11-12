@@ -33,7 +33,7 @@ Favorite - ChatBot Service
                 // Create heart icon
                 var heartIcon = document.createElement("span");
                 heartIcon.className = "heart-icon";
-                heartIcon.innerHTML = "❤️";
+                heartIcon.innerHTML = "&#10084";
                 heartIcon.onclick = function() { toggleFavorite(imageSrc); };
 
                 imgContainer.appendChild(imgElement);
@@ -75,7 +75,7 @@ Favorite - ChatBot Service
         right: 10px;
         cursor: pointer;
         font-size: 24px;
-        color: red;
+        color: rgb(233, 90, 90);
         transition: transform 0.3s ease, color 0.3s ease;
     }
     .heart-icon:hover {
