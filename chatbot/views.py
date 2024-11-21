@@ -16,10 +16,11 @@ import torch
 from sklearn.metrics.pairwise import cosine_similarity
 from dotenv import load_dotenv
 import os
-key="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"
+
 이전질문=""
 # OpenAI API 키 설정
-os.environ["OPENAI_API_KEY"] =key 
+
+key = os.environ["OPENAI_API_KEY"]
 
 load_dotenv()
 # OpenAI API 키 설정
